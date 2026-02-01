@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recycle Old Devices</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #00f2fe;
+            --accent-glow: rgba(0, 242, 254, 0.4);
+            --glass: rgba(10, 15, 30, 0.7);
+            --border: rgba(255, 255, 255, 0.08);
+            --bg: #010409;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 100px 20px 60px;
+            overflow-x: hidden;
+        }
+
+        /* Animated Mesh Background */
+        .background-blob {
+            position: fixed;
+            width: 800px; height: 800px;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            z-index: -1;
+            top: -200px; left: -200px;
+            filter: blur(100px);
+            animation: pulse 15s infinite alternate;
+        }
+
+        @keyframes pulse { from { transform: translate(0,0); } to { transform: translate(100px, 100px); } }
+
+        /* Navigation Bar */
+        nav {
+            position: fixed;
+            top: 20px;
+            width: 90%;
+            max-width: 1100px;
+            height: 60px;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            z-index: 1000;
+        }
+
+        .nav-links { display: flex; gap: 24px; }
+        .nav-links a, .nav-btn {
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: none;
+            border: none;
+        }
+
+        .nav-links a:hover, .nav-btn:hover { color: var(--accent); transform: translateY(-1px); }
+
+        /* Bento Form Container */
+        .bento-container {
+            width: 100%;
+            max-width: 750px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+
+        .bento-item {
+            background: var(--glass);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            transition: border-color 0.4s;
+        }
+
+        .bento-item:hover { border-color: rgba(0, 242, 254, 0.3); }
+        .full-width { grid-column: span 2; }
+
+        @media (max-width: 600px) { .bento-item { grid-column: span 2; } }
+
+        /* Interactive Elements */
+        label { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; color: var(--accent); letter-spacing: 1.2px; }
+
+        input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            padding: 14px;
+            border-radius: 14px;
+            color: #fff;
+            width: 100%;
+            font-size: 0.95rem;
+            transition: 0.3s;
+        }
+
+        input:focus { outline: none; border-color: var(--accent); background: rgba(255,255,255,0.08); }
+
+        /* Clickable Chips */
+        .chip-box { display: flex; flex-wrap: wrap; gap: 8px; }
+        .chip {
+            padding: 10px 18px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+            user-select: none;
+        }
+
+        .chip:hover { background: rgba(255,255,255,0.1); }
+        .chip.active {
+            background: var(--accent);
+            color: #000;
+            font-weight: 600;
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        /* 2026 Liquid Button */
+        .deploy-btn {
+            grid-column: span 2;
+            padding: 20px;
+            border-radius: 20px;
+            border: none;
+            background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+            color: #010409;
+            font-weight: 800;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .deploy-btn:hover {
+            transform: scale(1.02) translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 242, 254, 0.4);
+        }
+
+        .deploy-btn:active { transform: scale(0.98); }
+
+    </style>
+</head>
+<body>
+
+    <div class="background-blob"></div>
+
+    <nav>
+        <div style="font-weight: 800; letter-spacing: -1px;">RE<span style="color:var(--accent)">CYCLE</span></div>
+        <div class="nav-links">
+            <a href="index.html" onclick="console.log('Redirecting to Home...')">Mainpage</a>
+            <a href="software.html" onclick="console.log('Redirecting to Software...')">Software</a>
+            <a href="buy.html" onclick="console.log('Redirecting to Shop...')">Shop</a>
+        </div>
+    </nav>
+
+    <div class="bento-container">
+        
+        <div class="bento-item full-width">
+            <h1 style="font-size: 1.8rem; letter-spacing: -1px;">Recycle Your Old Devices</h1>
+            <p style="color: #94a3b8; font-size: 0.9rem;">Fill in all the parameters below to schedule your old devices pick up.</p>
+        </div>
+
+        <div class="bento-item">
+            <label>Full IC Name</label>
+            <input type="text" placeholder="eg. John Doe">
+        </div>
+
+        <div class="bento-item">
+            <label>Digital ID (Email)</label>
+            <input type="email" placeholder="eg. john@future.com">
+        </div>
+
+        <div class="bento-item full-width">
+            <label>Devices Category</label>
+            <div class="chip-box">
+                <div class="chip" onclick="toggleChip(this)">Smartphone</div>
+                <div class="chip" onclick="toggleChip(this)">Laptop</div>
+                <div class="chip" onclick="toggleChip(this)">Tablet</div>
+                <div class="chip" onclick="toggleChip(this)">Desktop</div>
+                <div class="chip" onclick="toggleChip(this)">Other</div>
+            </div>
+        </div>
+
+        <div class="bento-item">
+            <label>Quantity</label>
+            <input type="number" value="1" min="1" max="10">
+        </div>
+
+        <div class="bento-item">
+            <label>Region, State</label>
+            <input type="text" placeholder="eg. California, USA">
+        </div>
+
+        <div class="bento-item full-width">
+            <label>Pick Up Location</label>
+            <input type="text" placeholder="eg. 123 Future Lane, Suite 2026">
+        </div>
+
+        <div class="bento-item">
+            <label>Schedule Date</label>
+            <input type="date">
+        </div>
+
+        <div class="bento-item">
+            <label>Schedule Time</label>
+            <input type="time">
+        </div>
+
+        <button class="deploy-btn" onclick="handleSubmit()">
+           Request For Pickup
+        </button>
+
+    </div>
+
+    <script>
+        function toggleChip(el) {
+            // Modern selection logic: allows picking multiple or single
+            el.classList.toggle('active');
+        }
+
+        function handleSubmit() {
+            const btn = document.querySelector('.deploy-btn');
+            btn.innerHTML = "Processing...";
+            
+            setTimeout(() => {
+                alert("Your requests sent to our management office, please wait while our employees to pick up the devices at your suggested date and time. After pick up, we will left a promo code letter on your house front door mailbox. Thanks.");
+                btn.innerHTML = "Pick Up Requested Successfully";
+            }, 1500);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Important Visual Health Notice</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700&display=swap');
+
+        :root {
+            --bg: #030303;
+            --accent: #ffffff;
+            --card-border: rgba(255, 255, 255, 0.12);
+            --disabled: #222;
+            --text-dim: #666;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg);
+            color: var(--accent);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: #3a3aed;
+            filter: blur(150px);
+            opacity: 0.15;
+            top: 10%;
+            left: 10%;
+            z-index: -1;
+        }
+
+        .notice-card {
+            max-width: 600px;
+            width: 95%;
+            padding: 40px;
+            background: rgba(15, 15, 15, 0.7);
+            border: 1px solid var(--card-border);
+            border-radius: 32px;
+            backdrop-filter: blur(40px) saturate(180%);
+            box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+            animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: -0.04em;
+            margin: 0 0 8px 0;
+            background: linear-gradient(180deg, #fff 0%, #888 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h3 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--text-dim);
+            margin-bottom: 24px;
+        }
+
+        /* Scrollable Text Area */
+        .scroll-box {
+            max-height: 200px;
+            overflow-y: auto;
+            padding-right: 15px;
+            margin-bottom: 30px;
+            scrollbar-width: thin;
+            scrollbar-color: #333 transparent;
+        }
+
+        .scroll-box::-webkit-scrollbar { width: 4px; }
+        .scroll-box::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+
+        p {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: #ccc;
+            font-weight: 300;
+        }
+
+        b {
+            color: #fff;
+            font-weight: 600;
+            background: rgba(255,255,255,0.08);
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        /* Consent Section */
+        .consent-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 30px;
+            opacity: 0.5;
+            transition: opacity 0.3s;
+            cursor: not-allowed;
+        }
+
+        .consent-wrapper.active {
+            opacity: 1;
+            cursor: pointer;
+        }
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--accent);
+            cursor: inherit;
+        }
+
+        .consent-text {
+            font-size: 0.9rem;
+            color: #eee;
+        }
+
+        /* Button Logic */
+        .btn-proceed {
+            display: block;
+            background: var(--disabled);
+            color: #444;
+            text-align: center;
+            padding: 18px;
+            border-radius: 16px;
+            font-weight: 700;
+            cursor: not-allowed;
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            text-decoration: none;
+            pointer-events: none;
+        }
+
+        .btn-proceed.ready {
+            background: #fff;
+            color: #000;
+            cursor: pointer;
+            pointer-events: auto;
+        }
+
+        .btn-proceed.ready:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="notice-card">
+        <h1><b>Important Visual Health Notice</b></h1>
+        <h3>Read the folowing text carefully before proceed</h3>
+        
+        <div class="scroll-box" id="scrollBox">
+            <p>
+                The demo video contains sequences of rapid motion, high-speed time-lapses, and frequent color shifts that may create a flickering effect. These visuals may trigger discomfort or adverse reactions in viewers with <b>photosensitive epilepsy, light sensitivity, or those prone to motion sickness</b>. If you experience dizziness, altered vision, or eye strain, please discontinue watching immediately. <b>Do you wish to proceed? If not, pause and close this tab immediately.</b>
+            </p>
+        </div>
+
+        <label class="consent-wrapper" id="consentWrapper">
+            <input type="checkbox" id="consentCheck" disabled>
+            <span class="consent-text">I have read the statement above and I agree.</span>
+        </label>
+
+        <a href="video.html" class="btn-proceed" id="proceedBtn">I Wish To Proceed</a>
+    </div>
+
+    <script>
+        const scrollBox = document.getElementById('scrollBox');
+        const consentCheck = document.getElementById('consentCheck');
+        const consentWrapper = document.getElementById('consentWrapper');
+        const proceedBtn = document.getElementById('proceedBtn');
+
+        // Logic 1: Enable checkbox only when scrolled to bottom
+        scrollBox.addEventListener('scroll', () => {
+            const scrolledToBottom = scrollBox.scrollHeight - scrollBox.scrollTop <= scrollBox.clientHeight + 1;
+            
+            if (scrolledToBottom) {
+                consentCheck.disabled = false;
+                consentWrapper.classList.add('active');
+            }
+        });
+
+        // Logic 2: Enable button only when checkbox is ticked
+        consentCheck.addEventListener('change', () => {
+            if (consentCheck.checked) {
+                proceedBtn.classList.add('ready');
+            } else {
+                proceedBtn.classList.remove('ready');
+            }
+        });
+    </script>
+</body>
+</html>

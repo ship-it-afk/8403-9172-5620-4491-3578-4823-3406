@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StandardBook P1 | The Average Laptop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0071e3;
+            --bg: #000000;
+            --text: #f5f5f7;
+            --glass: rgba(255, 255, 255, 0.08);
+            --edge: #0078d7;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); overflow-x: hidden; line-height: 1.6; }
+
+        /* --- Navigation --- */
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 20px 5%; position: fixed; top: 0; width: 100%; z-index: 1000; backdrop-filter: blur(15px); background: rgba(0, 0, 0, 0.7); border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .logo { font-weight: 700; font-size: 1.2rem; }
+        .nav-links { list-style: none; display: flex; gap: 30px; }
+        .nav-links a { color: var(--text); text-decoration: none; font-size: 0.9rem; }
+
+        /* --- Common Section Styles --- */
+        .section-wrap { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 120px 20px; position: relative; }
+        h1 { font-size: clamp(2.5rem, 6vw, 5rem); font-weight: 700; background: linear-gradient(to bottom, #fff, #888); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 15px; }
+
+        /* --- Global Laptop Component --- */
+        .laptop-container { perspective: 2000px; display: flex; flex-direction: column; align-items: center; margin-top: 40px; transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1); position: relative; }
+        .laptop-lid { width: 60vw; max-width: 600px; aspect-ratio: 16 / 10; background: #222; border: 8px solid #333; border-radius: 12px 12px 0 0; position: relative; transform-origin: bottom; transform: rotateX(-90deg); transition: transform 1.2s ease; overflow: hidden; z-index: 2; }
+        .open-now { transform: rotateX(0deg); }
+        .screen-content { width: 100%; height: 100%; background: #000; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .screen-content img.bg-img { width: 100%; height: 100%; object-fit: cover; position: absolute; transition: opacity 0.6s ease; }
+        .laptop-base { width: 65vw; max-width: 650px; height: 18px; background: linear-gradient(to bottom, #333, #111); border-radius: 2px 2px 15px 15px; transform: rotateX(25deg); margin-top: -5px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+        .keyboard { width: 80%; height: 8px; margin: 4px auto; background: repeating-linear-gradient(90deg, #000 0px, #000 20px, transparent 20px, transparent 24px); opacity: 0.4; }
+
+        /* --- NEW: Spec Cards Section --- */
+        .specs-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 20px; 
+            width: 80%; 
+            max-width: 1000px; 
+            margin: 60px auto 0;
+        }
+        .spec-box { 
+            background: var(--glass); 
+            padding: 30px; 
+            border-radius: 24px; 
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+        .spec-box:hover { transform: translateY(-10px); background: rgba(255,255,255,0.15); }
+        .spec-box h3 { font-size: 1.5rem; margin-bottom: 5px; color: #fff; }
+        .spec-box p { color: #86868b; font-size: 0.9rem; }
+
+        /* --- Edge Section Specifics --- */
+        .edge-icon-giant {
+            position: absolute;
+            width: 400px;
+            right: -500px;
+            top: 20%;
+            z-index: 100;
+            filter: drop-shadow(0 0 30px rgba(0, 120, 215, 0.5));
+            transition: transform 2s cubic-bezier(0.45, 0.05, 0.55, 0.95), opacity 0.5s;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .swiping { transform: translateX(-200vw) rotate(-20deg); opacity: 1; }
+        .zoom-out { transform: scale(0.65); }
+        #browser-view { opacity: 0; z-index: 5; background: #fff; width: 100%; height: 100%; }
+
+        /* --- M365 Flying Icons --- */
+        .m365-field { position: relative; width: 100%; height: 200px; margin: 20px 0; }
+        .m365-icon {
+            position: absolute;
+            width: 70px;
+            opacity: 0;
+            transition: all 1.2s cubic-bezier(0.6, -0.28, 0.735, 0.045);
+        }
+        #word { top: 0; left: 25%; }
+        #excel { top: 50%; left: 35%; }
+        #ppt { top: 10%; left: 60%; }
+        #teams { top: 60%; left: 70%; }
+        .icons-visible .m365-icon { opacity: 1; transform: translateY(-20px); }
+        .fly-to-screen {
+            left: 50% !important;
+            top: 400px !important;
+            transform: scale(0.1) rotate(720deg) !important;
+            opacity: 0 !important;
+        }
+        #m365-dashboard { opacity: 0; z-index: 6; background: #f3f3f3; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+        /* --- Money Rain Effect --- */
+        .money-particle {
+            position: absolute;
+            font-size: 2rem;
+            z-index: 10;
+            top: 40%;
+            opacity: 0;
+            pointer-events: none;
+        }
+        @keyframes moneyDrop {
+            0% { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(400px) scale(0.5) rotate(360deg); opacity: 0; }
+        }
+
+        /* --- Price Reveal --- */
+        .price-tag {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 1s ease;
+            margin-top: 30px;
+        }
+        .price-tag.show { opacity: 1; transform: translateY(0); }
+        .price-amount { font-size: 4rem; font-weight: 700; color: #fff; }
+        .buy-btn { display: inline-block; margin-top: 20px; padding: 15px 40px; background: var(--primary); color: white; border-radius: 30px; text-decoration: none; font-weight: 600; }
+
+        footer { padding: 60px; text-align: center; color: #555; border-top: 1px solid #222; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">StandardBook P1 | The Average Laptop</div>
+        <ul class="nav-links">
+            <li><a href="#hero">StandardBook P1</a></li>
+            <li><a href="#win-section">Windows</a></li>
+            <li><a href="#edge-section">Edge</a></li>
+            <li><a href="#m365-section">M365</a></li>
+        </ul>
+    </nav>
+
+    <section class="section-wrap" id="hero">
+        <h1>StandardBook P1</h1>
+        <p style="color:#86868b; font-size: 1.4rem;">For individuals who only wanted to achieve daily tasks</p>
+        <div class="laptop-container">
+            <div class="laptop-lid open-now">
+                <div class="screen-content"><img class="bg-img" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1000"></div>
+            </div>
+            <div class="laptop-base"><div class="keyboard"></div></div>
+        </div>
+
+        <div class="specs-grid">
+            <div class="spec-box">
+                <h3>Intel CORE</h3>
+                <p>i5 Processors</p>
+            </div>
+            <div class="spec-box">
+                <h3>Up to 12h</h3>
+                <p>Battery Life</p>
+            </div>
+            <div class="spec-box">
+                <h3>2K OLED 30Hz</h3>
+                <p>Non-touchable Display</p>
+            </div>
+            <div class="spec-box">
+                <h3>Fast Memory</h3>
+                <p>16GB LPDDR5X</p>
+            </div>
+            <div class="spec-box">
+                <h3>Nvidia</h3>
+                <p>RTX 3050 Graphics</p>
+            </div>
+            <div class="spec-box">
+                <h3>Quad</h3>
+                <p>192000Hz Speakers</p>
+            </div>
+            <div class="spec-box">
+                <h3>Powered By</h3>
+                <p>Windows 11 Pro 25H2</p>
+            </div>
+            <div class="spec-box">
+                <h3>1 MP IR</h3>
+                <p>Front-facing Webcam</p>
+            </div>
+            <div class="spec-box">
+                <h3>Built-in</h3>
+                <p>Fingerprint Sensor</p>
+            </div>
+            <div class="spec-box">
+                <h3>Free Microsoft</h3>
+                <p>365 Premium for 1 year</p>
+            </div>
+            <div class="spec-box">
+                <h3>Dual Storage</h3>
+                <p>1TB SSD + 6TB Onedrive</p>
+            </div>
+            <div class="spec-box">
+                <h3>Weight</h3>
+                <p>Only <900 grams!</p>
+            </div>
+            <div class="spec-box">
+                <h3>15 Inches</h3>
+                <p>large display</p>
+            </div>
+            <div class="spec-box">
+                <h3>1.5 Years</h3>
+                <p>free-return + warranty</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-wrap" id="win-section" style="background: radial-gradient(circle at center, #001e3c 0%, #000 100%);">
+        <h1>Windows 11 Pro 25H2</h1>
+        <div class="laptop-container">
+            <div class="laptop-lid" id="lid2">
+                <div class="screen-content">
+                    <img class="bg-img" style="opacity:0.2" src="https://thumbs.dreamstime.com/b/autumn-leaves-wet-stone-pathway-park-beautiful-fall-season-weather-night-concept-melancholy-rain-scene-wallpaper-395389772.jpg">
+                    <img id="win-logo" style="width:80px; opacity:0; transform:scale(4) rotate(-180deg); transition:1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)" src="https://upload.wikimedia.org/wikipedia/commons/8/87/Windows_logo_-_2021.svg">
+                </div>
+            </div>
+            <div class="laptop-base"><div class="keyboard"></div></div>
+        </div>
+    </section>
+
+    <section class="section-wrap" id="edge-section">
+        <img id="edge-logo-giant" class="edge-icon-giant" src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Microsoft_Edge_logo_%282019%29.svg/500px-Microsoft_Edge_logo_%282019%29.svg.png">
+        <h1>Built-in Microsoft Edge</h1>
+        <div class="laptop-container" id="edge-laptop-box">
+            <div class="laptop-lid" id="lid3">
+                <div class="screen-content">
+                    <img id="edge-screen-old" class="bg-img" src="https://platform.theverge.com/wp-content/uploads/sites/2/chorus/uploads/chorus_asset/file/14009273/ie9logo.1419971092.png?quality=90&strip=all&crop=0,0.039032006245115,100,99.92193598751">
+                    <div id="browser-view" class="bg-img" style="background:#fff; display:flex; flex-direction:column;">
+                        <div style="height:25px; background:#f0f0f0; width:100%; border-bottom:1px solid #ccc;"></div>
+                        <img src="https://blogs.microsoft.com/wp-content/uploads/prod/sites/166/2020/01/Customize-Microsoft-Edge.jpg" style="width:100%; height:100%; object-fit:cover;">
+                    </div>
+                </div>
+            </div>
+            <div class="laptop-base"><div class="keyboard"></div></div>
+        </div>
+    </section>
+
+    <section class="section-wrap" id="m365-section">
+        <h1>Free MS Office 365 for 1 Year</h1>
+        <div class="m365-field" id="m365-icons-trigger">
+            <img id="word" class="m365-icon" src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Microsoft_Outlook_Icon_%282025%E2%80%93present%29.svg/960px-Microsoft_Outlook_Icon_%282025%E2%80%93present%29.svg.png">
+            <img id="excel" class="m365-icon" src="https://upload.wikimedia.org/wikipedia/commons/6/60/Microsoft_Office_Excel_%282025%E2%80%93present%29.svg">
+            <img id="ppt" class="m365-icon" src="https://upload.wikimedia.org/wikipedia/commons/d/df/Microsoft_Office_PowerPoint_%282025%E2%80%93present%29.svg">
+            <img id="teams" class="m365-icon" src="https://live.versio.io/product/microsoft-word.svg">
+        </div>
+
+        <div class="laptop-container">
+            <div class="laptop-lid" id="lid4">
+                <div class="screen-content">
+                    <img id="pre-m365-bg" class="bg-img" src="https://wallpapers.com/images/featured/windows-11-9dprha0cs52xeeok.jpg">
+                    <div id="m365-dashboard" class="bg-img">
+                        <img src="https://support.microsoft.com/images/en-us/a800a3f9-f73c-46b0-9b08-774017436549" style="width:100%;">
+                        <p style="color:#333; font-weight:700; margin-top:10px;">Microsoft 365</p>
+                    </div>
+                </div>
+            </div>
+            <div class="laptop-base"><div class="keyboard"></div></div>
+        </div>
+    </section>
+
+    <section class="section-wrap" id="price-section">
+        <h1>Own the Laptop</h1>
+        <div class="laptop-container">
+            <div class="laptop-lid" id="lid-price">
+                <div class="screen-content"><div style="font-size: 5rem;">💰</div></div>
+            </div>
+            <div class="laptop-base"><div class="keyboard"></div></div>
+            <div id="money-container" style="position: absolute; width: 100%; height: 100%;"></div>
+        </div>
+        <div class="price-tag" id="price-info">
+            <p style="color: #86868b; letter-spacing: 2px;">STARTING AT</p>
+            <div class="price-amount">RM 3999</div>
+            <a href="buy.html" class="buy-btn">Order Now</a>
+        </div>
+    </section>
+
+    <footer>&copy; 2026 ASAS Technologies Inc. Built for the modern web & technologies.</footer>
+
+    <script>
+        const observerOptions = { threshold: 0.6 };
+
+        const winObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    document.getElementById('lid2').classList.add('open-now');
+                    setTimeout(() => {
+                        const logo = document.getElementById('win-logo');
+                        logo.style.opacity = '1';
+                        logo.style.transform = 'scale(1) rotate(0deg)';
+                    }, 600);
+                }
+            });
+        }, observerOptions);
+
+        const edgeObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    const lid = document.getElementById('lid3');
+                    const container = document.getElementById('edge-laptop-box');
+                    const giantLogo = document.getElementById('edge-logo-giant');
+                    const browser = document.getElementById('browser-view');
+                    const oldScreen = document.getElementById('edge-screen-old');
+                    lid.classList.add('open-now');
+                    setTimeout(() => {
+                        container.classList.add('zoom-out');
+                        giantLogo.classList.add('swiping');
+                        setTimeout(() => {
+                            browser.style.opacity = '1';
+                            oldScreen.style.opacity = '0';
+                        }, 1000);
+                    }, 800);
+                }
+            });
+        }, observerOptions);
+
+        const m365Observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    const section = document.getElementById('m365-section');
+                    const lid = document.getElementById('lid4');
+                    const icons = document.querySelectorAll('.m365-icon');
+                    const dashboard = document.getElementById('m365-dashboard');
+                    const oldBg = document.getElementById('pre-m365-bg');
+                    section.classList.add('icons-visible');
+                    lid.classList.add('open-now');
+                    setTimeout(() => {
+                        icons.forEach((icon, index) => {
+                            setTimeout(() => icon.classList.add('fly-to-screen'), index * 150);
+                        });
+                        setTimeout(() => {
+                            dashboard.style.opacity = '1';
+                            oldBg.style.opacity = '0';
+                        }, 1200);
+                    }, 800);
+                }
+            });
+        }, { threshold: 0.4 });
+
+        const priceObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    const lid = document.getElementById('lid-price');
+                    const priceInfo = document.getElementById('price-info');
+                    lid.classList.add('open-now');
+                    setTimeout(() => {
+                        createMoneyRain();
+                        setTimeout(() => priceInfo.classList.add('show'), 1000);
+                    }, 800);
+                }
+            });
+        }, { threshold: 0.6 });
+
+        function createMoneyRain() {
+            const container = document.getElementById('money-container');
+            const currency = ['💵', '💰', '💸', '🤑', '💵'];
+            for(let i = 0; i < 40; i++) {
+                setTimeout(() => {
+                    const money = document.createElement('div');
+                    money.className = 'money-particle';
+                    money.innerText = currency[Math.floor(Math.random() * currency.length)];
+                    money.style.left = (Math.random() * 60 + 20) + '%';
+                    money.style.animation = `moneyDrop ${1 + Math.random()}s linear forwards`;
+                    container.appendChild(money);
+                    setTimeout(() => money.remove(), 2000);
+                }, i * 50);
+            }
+        }
+
+        winObserver.observe(document.getElementById('win-section'));
+        edgeObserver.observe(document.getElementById('edge-section'));
+        m365Observer.observe(document.getElementById('m365-section'));
+        priceObserver.observe(document.getElementById('price-section'));
+    </script>
+</body>
+</html>

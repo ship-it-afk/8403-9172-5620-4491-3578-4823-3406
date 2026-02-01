@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+    <title>C. Phone L10 | The Future in Your Hand</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0071e3;
+            --bg: #000000;
+            --text: #f5f5f7;
+            --glass: rgba(255, 255, 255, 0.08);
+            --phone-frame: #1c1c1e;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); overflow-x: hidden; line-height: 1.6; }
+
+        /* --- Navigation --- */
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 5%; position: fixed; top: 0; width: 100%; z-index: 1000; backdrop-filter: blur(15px); background: rgba(0, 0, 0, 0.7); border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .logo { font-weight: 700; font-size: 1.1rem; }
+        .nav-links { list-style: none; display: flex; gap: 15px; }
+        .nav-links a { color: var(--text); text-decoration: none; font-size: 0.8rem; opacity: 0.8; }
+
+        /* --- Common Section Styles --- */
+        .section-wrap { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 100px 20px; position: relative; }
+        h1 { font-size: clamp(2rem, 8vw, 4rem); font-weight: 700; background: linear-gradient(to bottom, #fff, #888); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 15px; }
+
+        /* --- Phone Component (Replaces Laptop) --- */
+        .phone-container { perspective: 1500px; display: flex; flex-direction: column; align-items: center; margin-top: 30px; position: relative; }
+        
+        .phone-body { 
+            width: 280px; 
+            height: 580px; 
+            background: var(--phone-frame); 
+            border: 12px solid #333; 
+            border-radius: 45px; 
+            position: relative; 
+            transform: rotateY(20deg) rotateX(10deg);
+            transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1); 
+            overflow: hidden; 
+            box-shadow: 20px 40px 60px rgba(0,0,0,0.5), inset 0 0 10px rgba(255,255,255,0.1);
+            z-index: 2;
+        }
+
+        .phone-body.active { transform: rotateY(0deg) rotateX(0deg) scale(1.05); }
+
+        /* Screen content */
+        .screen-content { width: 100%; height: 100%; background: #000; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .bg-img { width: 100%; height: 100%; object-fit: cover; position: absolute; transition: opacity 0.6s ease; }
+        
+        /* Speaker notch */
+        .notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 120px; height: 25px; background: #333; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px; z-index: 10; }
+
+        /* --- Spec Cards --- */
+        .specs-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; width: 100%; max-width: 600px; margin-top: 50px; }
+        .spec-box { background: var(--glass); padding: 20px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); }
+        .spec-box h3 { font-size: 1.1rem; color: #fff; }
+        .spec-box p { color: #86868b; font-size: 0.8rem; }
+
+        /* --- Edge Section Animation --- */
+        .edge-icon-giant { position: absolute; width: 250px; right: -300px; top: 30%; z-index: 100; opacity: 0; transition: transform 2s ease, opacity 0.5s; pointer-events: none; }
+        .swiping { transform: translateX(-150vw) rotate(-45deg); opacity: 1; }
+        #browser-view { opacity: 0; background: #fff; z-index: 5; }
+
+        /* --- M365 Flying Icons --- */
+        .m365-field { position: relative; width: 100%; height: 150px; margin: 10px 0; }
+        .m365-icon { position: absolute; width: 50px; opacity: 0; transition: all 1s ease-in-out; }
+        #word { left: 10%; } #excel { left: 30%; } #ppt { left: 60%; } #teams { left: 85%; }
+        .fly-to-screen { left: 50% !important; top: 150px !important; transform: scale(0.1) rotate(720deg) !important; opacity: 0 !important; }
+        #m365-dashboard { opacity: 0; z-index: 6; background: #fff; }
+
+        /* --- Money Rain --- */
+        .money-particle { position: absolute; font-size: 1.5rem; z-index: 10; top: 40%; opacity: 0; pointer-events: none; }
+        @keyframes moneyDrop {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(300px) rotate(360deg); opacity: 0; }
+        }
+
+        /* --- Price --- */
+        .price-tag { opacity: 0; transform: translateY(20px); transition: 1s ease; margin-top: 30px; }
+        .price-tag.show { opacity: 1; transform: translateY(0); }
+        .price-amount { font-size: 3rem; font-weight: 700; color: #fff; }
+        .buy-btn { display: inline-block; margin-top: 15px; padding: 12px 35px; background: var(--primary); color: white; border-radius: 25px; text-decoration: none; font-weight: 600; }
+
+        footer { padding: 40px; text-align: center; color: #555; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">C. Phone L10 5G</div>
+        <ul class="nav-links">
+            <li><a href="#hero">Specs</a></li>
+            <li><a href="#win-section">OS</a></li>
+            <li><a href="#edge-section">Edge</a></li>
+            <li><a href="#m365-section">G. CTS</a></li>
+        </ul>
+    </nav>
+
+    <section class="section-wrap" id="hero">
+        <h1>C. Phone L10 5G</h1>
+        <p style="color:#86868b;">The power of a C. Phone L10, in your palm.</p>
+        <div class="phone-container">
+            <div class="phone-body active">
+                <div class="notch"></div>
+                <div class="screen-content">
+                    <img class="bg-img" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600">
+                </div>
+            </div>
+        </div>
+
+        <div class="specs-grid">
+            <div class="spec-box"><h3>Snapdragon X</h3><p>Mobile Edition</p></div>
+            <div class="spec-box"><h3>12h+</h3><p>Battery Life</p></div>
+            <div class="spec-box"><h3>2K OLED 120Hz</h3><p>Dolby Vision Display</p></div>
+            <div class="spec-box"><h3>Advanced Cameras</h3><p>108 MP IR Front + 200 MP Back</p></div>
+            <div class="spec-box"><h3>Fast Memory</h3><p>12 GB LPDDR4</p></div>
+            <div class="spec-box"><h3>Large Storage</h3><p>512 GB eMMC</p></div>
+        </div>
+    </section>
+
+    <section class="section-wrap" id="win-section" style="background: radial-gradient(circle at center, #001e3c 0%, #000 100%);">
+        <h1>Android 16 Mobile</h1>
+        <div class="phone-container">
+            <div class="phone-body" id="phone2">
+                <div class="notch"></div>
+                <div class="screen-content">
+                    <img class="bg-img" style="opacity:0.3" src="https://thumbs.dreamstime.com/b/autumn-leaves-wet-stone-pathway-park-beautiful-fall-season-weather-night-concept-melancholy-rain-scene-wallpaper-395389772.jpg">
+                    <img id="win-logo" style="width:60px; opacity:0; transform:scale(3); transition:1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)" src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Android_robot.svg/250px-Android_robot.svg.png">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-wrap" id="edge-section">
+        <img id="edge-logo-giant" class="edge-icon-giant" src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Microsoft_Edge_logo_%282019%29.svg/500px-Microsoft_Edge_logo_%282019%29.svg.png">
+        <h1>Microsoft Edge</h1>
+        <div class="phone-container">
+            <div class="phone-body" id="phone3">
+                <div class="notch"></div>
+                <div class="screen-content">
+                    <img id="edge-screen-old" class="bg-img" src="https://play-lh.googleusercontent.com/EY1Uvq1qOHW0JyWIXOsEH2Zf6bVQo39QM8B1YajuseVF4NWEmlg_0w7H0h7e3uyxhw=w2560-h1440-rw">
+                    <div id="browser-view" class="bg-img" style="display:flex; flex-direction:column; padding-top:30px;">
+                        <img src="https://blogs.microsoft.com/wp-content/uploads/prod/sites/166/2020/01/Customize-Microsoft-Edge.jpg" style="width:100%; height:100%; object-fit:cover;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-wrap" id="m365-section">
+        <h1>Google CTS with AI</h1>
+        <div class="phone-container">
+            <div class="phone-body" id="phone4">
+                <div class="notch"></div>
+                <div class="screen-content">
+                    <img id="pre-m365-bg" class="bg-img" src="https://play-lh.googleusercontent.com/tyAEPMfb1geLO21RhKr-qpO2Ywff3UGCY1CYMpDxtYGw970VOGeFycrXiNVJRr-vIsKs=w2560-h1440-rw">
+                    <div id="m365-dashboard" class="bg-img" style="display:flex; align-items:center; justify-content:center; flex-direction:column;">
+                        <img src="https://play-lh.googleusercontent.com/3cgxGnO4vFGfdQJBSBg-kD0qDTTqiTF3Uo4q9MORc2fYUuQ5aBPEuRhrP3DnqWq_wjCx=w2560-h1440-rw" style="width:100%;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-wrap" id="price-section">
+        <h1>Own The Phone</h1>
+        <div class="phone-container">
+            <div class="phone-body" id="phone-price">
+                <div class="notch"></div>
+                <div class="screen-content"><div style="font-size: 4rem;">💰</div></div>
+            </div>
+            <div id="money-container" style="position: absolute; width: 100%; height: 100%;"></div>
+        </div>
+
+        <div class="price-tag" id="price-info">
+            <p style="color: #86868b;">STARTING AT</p>
+            <div class="price-amount">RM 4999</div>
+            <a href="buy.html" class="buy-btn">Order Now</a>
+        </div>
+    </section>
+
+    <footer>&copy; 2026 ASAS Technologies Inc.</footer>
+
+    <script>
+        const observerOptions = { threshold: 0.5 };
+
+        // Windows Animation
+        const winObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    document.getElementById('phone2').classList.add('active');
+                    setTimeout(() => {
+                        const logo = document.getElementById('win-logo');
+                        logo.style.opacity = '1';
+                        logo.style.transform = 'scale(1) rotate(0deg)';
+                    }, 600);
+                }
+            });
+        }, observerOptions);
+
+        // Edge Animation
+        const edgeObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    const phone = document.getElementById('phone3');
+                    const giantLogo = document.getElementById('edge-logo-giant');
+                    const browser = document.getElementById('browser-view');
+                    const oldScreen = document.getElementById('edge-screen-old');
+                    phone.classList.add('active');
+                    setTimeout(() => {
+                        giantLogo.classList.add('swiping');
+                        setTimeout(() => {
+                            browser.style.opacity = '1';
+                            oldScreen.style.opacity = '0';
+                        }, 800);
+                    }, 600);
+                }
+            });
+        }, observerOptions);
+
+        // M365 Animation
+        const m365Observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    const phone = document.getElementById('phone4');
+                    const icons = document.querySelectorAll('.m365-icon');
+                    const dashboard = document.getElementById('m365-dashboard');
+                    const oldBg = document.getElementById('pre-m365-bg');
+                    phone.classList.add('active');
+                    setTimeout(() => {
+                        icons.forEach((icon, index) => {
+                            setTimeout(() => icon.classList.add('fly-to-screen'), index * 150);
+                        });
+                        setTimeout(() => {
+                            dashboard.style.opacity = '1';
+                            oldBg.style.opacity = '0';
+                        }, 1000);
+                    }, 600);
+                }
+            });
+        }, observerOptions);
+
+        // Price Animation
+        const priceObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    document.getElementById('phone-price').classList.add('active');
+                    setTimeout(() => {
+                        createMoneyRain();
+                        document.getElementById('price-info').classList.add('show');
+                    }, 800);
+                }
+            });
+        }, observerOptions);
+
+        function createMoneyRain() {
+            const container = document.getElementById('money-container');
+            const currency = ['💵', '💰', '💸', '🤑'];
+            for(let i = 0; i < 30; i++) {
+                setTimeout(() => {
+                    const money = document.createElement('div');
+                    money.className = 'money-particle';
+                    money.innerText = currency[Math.floor(Math.random() * currency.length)];
+                    money.style.left = (Math.random() * 80 + 10) + '%';
+                    money.style.animation = `moneyDrop ${1 + Math.random()}s linear forwards`;
+                    container.appendChild(money);
+                    setTimeout(() => money.remove(), 2000);
+                }, i * 70);
+            }
+        }
+
+        winObserver.observe(document.getElementById('win-section'));
+        edgeObserver.observe(document.getElementById('edge-section'));
+        m365Observer.observe(document.getElementById('m365-section'));
+        priceObserver.observe(document.getElementById('price-section'));
+    </script>
+</body>
+</html>

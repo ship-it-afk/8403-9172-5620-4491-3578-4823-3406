@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+    <title>Product Activation</title>
+    <style>
+        :root {
+            --accent: #00f2fe;
+            --accent-glow: rgba(0, 242, 254, 0.3);
+            --error: #ff4bb4;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.12);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: #020617;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+            overflow: hidden;
+        }
+
+        /* Animated Liquid Background */
+        .bg-blob {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: linear-gradient(135deg, #4f46e5 0%, #00f2fe 100%);
+            filter: blur(80px);
+            border-radius: 50%;
+            z-index: -1;
+            animation: move 20s infinite alternate;
+            opacity: 0.4;
+        }
+
+        @keyframes move {
+            from { transform: translate(-30%, -30%) scale(1); }
+            to { transform: translate(30%, 30%) scale(1.2); }
+        }
+
+        /* Liquid Glass Container */
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border: 1px solid var(--border);
+            border-radius: 32px;
+            padding: 40px;
+            width: 100%;
+            max-width: 380px;
+            text-align: center;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin: 0 0 10px 0;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle { color: #94a3b8; font-size: 0.9rem; margin-bottom: 30px; }
+
+        .input-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            padding: 16px;
+            border-radius: 16px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+            box-sizing: border-box;
+            transition: 0.3s;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            border-radius: 16px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: white;
+            color: black;
+            margin-bottom: 12px;
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.02);
+            background: var(--accent);
+        }
+
+        /* Hidden Purchase Button */
+        #buyBtn {
+            background: rgba(255, 75, 180, 0.15);
+            color: #ff4bb4;
+            border: 1px solid rgba(255, 75, 180, 0.3);
+            display: none;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: slideUp 0.5s forwards;
+        }
+
+        #buyBtn:hover {
+            background: rgba(255, 75, 180, 0.25);
+        }
+
+        @keyframes slideUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #status {
+            margin-top: 20px;
+            font-size: 0.85rem;
+            min-height: 40px;
+            transition: 0.3s;
+        }
+
+        .loader {
+            width: 24px;
+            height: 24px;
+            border: 2px solid rgba(255,255,255,0.1);
+            border-top: 2px solid var(--accent);
+            border-radius: 50%;
+            display: none;
+            margin: 0 auto 10px;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="bg-blob"></div>
+
+<div class="glass-card" id="mainCard">
+    <div class="loader" id="spinner"></div>
+    <h2>Standard Plan Product Activation</h2>
+    <p class="subtitle">Product activation for standard plan is required. You can free trial our apps before buy.</p>
+
+    <div class="input-wrapper">
+        <input type="text" id="keyInput" placeholder="ACTIVATION KEY" autocomplete="off">
+    </div>
+
+    <button class="btn-primary" id="verifyBtn" onclick="validate()">Verify</button>
+    
+    <button id="buyBtn" onclick="window.location.href='standard.html'">Purchase License</button>
+
+    <div id="status"></div>
+</div>
+
+<script>
+    function validate() {
+        const key = document.getElementById('keyInput').value.trim();
+        const status = document.getElementById('status');
+        const buyBtn = document.getElementById('buyBtn');
+        const verifyBtn = document.getElementById('verifyBtn');
+        const spinner = document.getElementById('spinner');
+        const card = document.getElementById('mainCard');
+
+        // YOUR SCRIPT URL
+        const scriptUrl = "https://script.google.com/macros/s/AKfycbwgxD4NJZBeReLB0DbevPaMMYIE6qD0sLS4ZQbfjcSGFyWmJPALCofPRcuCxUHE8607/exec";
+
+        if (!key) {
+            status.innerHTML = '<span style="color:#94a3b8">Enter a key to proceed</span>';
+            return;
+        }
+
+        // Reset UI
+        status.innerHTML = "";
+        buyBtn.style.display = "none";
+        spinner.style.display = "block";
+        verifyBtn.disabled = true;
+        verifyBtn.style.opacity = "0.5";
+
+        // JSONP Request
+        const script = document.createElement('script');
+        script.src = `${scriptUrl}?key=${encodeURIComponent(key)}&callback=onResult&t=${Date.now()}`;
+        document.body.appendChild(script);
+    }
+
+    function onResult(data) {
+        const status = document.getElementById('status');
+        const buyBtn = document.getElementById('buyBtn');
+        const verifyBtn = document.getElementById('verifyBtn');
+        const spinner = document.getElementById('spinner');
+
+        spinner.style.display = "none";
+        verifyBtn.disabled = false;
+        verifyBtn.style.opacity = "1";
+
+        if (data.valid) {
+            status.innerHTML = '<span style="color:#00f2fe">Redirecting...</span>';
+            setTimeout(() => window.location.href = "standardapp.html", 1200);
+        } else {
+            status.innerHTML = '<span style="color:#ff4bb4">Invalid product key.<br>Please double check or purchase a valid license.</span>';
+            buyBtn.style.display = "block";
+            
+            // Subtle "Error Shake" animation
+            const card = document.getElementById('mainCard');
+            card.style.transform = "translateX(10px)";
+            setTimeout(() => card.style.transform = "translateX(-10px)", 100);
+            setTimeout(() => card.style.transform = "translateX(0)", 200);
+        }
+    }
+
+    document.getElementById('keyInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') validate();
+    });
+</script>
+
+</body>
+</html>

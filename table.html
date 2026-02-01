@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compare Plans | ASAS Softwares</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3b82f6; /* Brighter blue for dark mode visibility */
+            --primary-dark: #2563eb;
+            --bg: #0f172a; /* Deep Navy/Slate */
+            --card-bg: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --hover-bg: #1e293b;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            color: #ffffff;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            margin-bottom: 3rem;
+            font-size: 1.1rem;
+        }
+
+        .table-container {
+            width: 100%;
+            max-width: 1100px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            overflow-x: auto;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            min-width: 800px;
+        }
+
+        th {
+            background-color: #0f172a; /* Slightly darker than card */
+            padding: 20px;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.95rem;
+            color: #cbd5e1;
+        }
+
+        tr:hover {
+            background-color: #334155;
+        }
+
+        /* Sticky Column for Mobile/Scroll */
+        td:first-child {
+            font-weight: 600;
+            color: #ffffff;
+            background-color: var(--card-bg);
+            position: sticky;
+            left: 0;
+            z-index: 10;
+        }
+
+        /* Status Styles */
+        .check { color: #34d399; font-weight: bold; } /* Brighter Green */
+        .cross { color: #f87171; font-weight: bold; } /* Brighter Red */
+        .ads-tag {
+            font-size: 0.75rem;
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--primary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 5px;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        /* Pricing Row */
+        .price-row td {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--primary);
+            padding: 30px 20px;
+        }
+
+        .price-row td:first-child {
+            color: var(--text-muted);
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>Plans Comparison</h1>
+    <p class="subtitle">Choose the best plan for your workflow and security needs.</p>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Features</th>
+                    <th>Free Trial</th>
+                    <th>Personal</th>
+                    <th>Standard</th>
+                    <th>Business Educations</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Expert File Info</td>
+                    <td><span class="check">✓</span> <span class="ads-tag">+ ADS</span></td>
+                    <td><span class="check">✓</span></td>
+                    <td><span class="check">✓</span></td>
+                    <td><span class="check">✓</span></td>
+                </tr>
+                <tr>
+                    <td>AI Document Summariser</td>
+                    <td><span class="check">✓</span> <span class="ads-tag">+ ADS</span></td>
+                    <td><span class="check">✓</span></td>
+                    <td><span class="check">✓</span></td>
+                    <td><span class="check">✓</span></td>
+                </tr>
+                <tr>
+                    <td>Quantum-level File Encrypter</td>
+                    <td><span class="check">✓</span> <span class="ads-tag">+ ADS</span></td>
+                    <td><span class="check">✓</span></td>
+                    <td><span class="check">✓</span></td>
+                    <td><span class="check">✓</span></td>
+                </tr>
+                <tr>
+                    <td>URL Shortener</td>
+                    <td><span class="check">✓</span> <span class="ads-tag">+ ADS</span></td>
+                    <td><span class="check">✓</span></td>
+                    <td><span class="check">✓</span></td>
+                    <td><span class="check">✓</span></td>
+                </tr>
+                <tr>
+                    <td>FastBrowser</td>
+                    <td>Basic</td>
+                    <td>Lite</td>
+                    <td><strong>Pro</strong></td>
+                    <td><strong>Pro</strong></td>
+                </tr>
+                <tr>
+                    <td>ASAS Notepad</td>
+                    <td><span class="cross">✕</span></td>
+                    <td><span class="cross">✕</span></td>
+                    <td><span class="check">✓</span></td>
+                    <td><span class="check">✓</span></td>
+                </tr>
+                <tr>
+                    <td>ASAS Music App</td>
+                    <td><span class="cross">✕</span></td>
+                    <td><span class="cross">✕</span></td>
+                    <td><span class="check">✓</span></td>
+                    <td><span class="check">✓</span></td>
+                </tr>
+                <tr>
+                    <td>ASAS AI Dictionary</td>
+                    <td><span class="cross">✕</span></td>
+                    <td><span class="cross">✕</span></td>
+                    <td><span class="cross">✕</span></td>
+                    <td><span class="check">✓</span></td>
+                </tr>
+                <tr>
+                    <td>Temp Email Generator</td>
+                    <td><span class="cross">✕</span></td>
+                    <td><span class="cross">✕</span></td>
+                    <td><span class="cross">✕</span></td>
+                    <td><span class="check">✓</span></td>
+                </tr>
+                <tr>
+                    <td>Free Apps Store (Windows)</td>
+                    <td><span class="cross">✕</span></td>
+                    <td><span class="cross">✕</span></td>
+                    <td><span class="cross">✕</span></td>
+                    <td><span class="check">✓</span></td>
+                </tr>
+                <tr>
+                    <td>Private Chat</td>
+                    <td><span class="cross">✕</span></td>
+                    <td><span class="cross">✕</span></td>
+                    <td><span class="cross">✕</span></td>
+                    <td><span class="check">✓</span></td>
+                </tr>
+                <tr>
+                    <td>Advanced API Access</td>
+                    <td><span class="cross">✕</span></td>
+                    <td><span class="cross">✕</span></td>
+                    <td><span class="cross">✕</span></td>
+                    <td><span class="check">✓</span> <span class="ads-tag">Limited Edition</span></td>
+                </tr>
+                <tr>
+                    <td>License</td>
+                    <td>Personal</td>
+                    <td>Personal / Home</td>
+                    <td>Personal / Home</td>
+                    <td>Public</td>
+                </tr>
+                <tr>
+                    <td>Features / UI Updates</td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td>1 Month</td>
+                    <td>2 Months & 15 Days</td>
+                </tr>
+                <tr>
+                    <td>Security Updates</td>
+                    <td>—</td>
+                    <td>1 Year</td>
+                    <td>1 Year</td>
+                    <td>1 Year</td>
+                </tr>
+                <tr>
+                    <td>Expire Date</td>
+                    <td>14 Days</td>
+                    <td>—</td>
+                    <td>—</td>
+                    <td>—</td>
+                </tr>
+                <tr class="price-row">
+                    <td>Price</td>
+                    <td>RM 0</td>
+                    <td>RM 299</td>
+                    <td>RM 2399</td>
+                    <td>RM 2499</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>

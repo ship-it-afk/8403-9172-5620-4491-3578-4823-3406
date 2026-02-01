@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpeedTab Extra 5G™ | ASAS's Fastest Tablet</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0071e3;
+            --bg: #000000;
+            --text: #f5f5f7;
+            --glass: rgba(255, 255, 255, 0.08);
+            --tablet-frame: #1c1c1e;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); color: var(--text); overflow-x: hidden; line-height: 1.6; }
+
+        /* --- Navigation --- */
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 15px 5%; position: fixed; top: 0; width: 100%; z-index: 1000; backdrop-filter: blur(15px); background: rgba(0, 0, 0, 0.7); border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .logo { font-weight: 700; font-size: 1.1rem; }
+        .nav-links { list-style: none; display: flex; gap: 20px; }
+        .nav-links a { color: var(--text); text-decoration: none; font-size: 0.8rem; opacity: 0.8; }
+
+        /* --- Common Section Styles --- */
+        .section-wrap { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 100px 20px; position: relative; }
+        h1 { font-size: clamp(2rem, 8vw, 4rem); font-weight: 700; background: linear-gradient(to bottom, #fff, #888); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 15px; }
+
+        /* --- Tablet Component --- */
+        .tablet-container { perspective: 1500px; display: flex; flex-direction: column; align-items: center; margin-top: 30px; position: relative; width: 100%; }
+        
+        .tablet-body { 
+            width: 70vw; 
+            max-width: 550px; 
+            aspect-ratio: 4 / 3; 
+            background: var(--tablet-frame); 
+            border: 12px solid #333; 
+            border-radius: 32px; 
+            position: relative; 
+            transform: rotateY(15deg) rotateX(5deg);
+            transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1); 
+            overflow: hidden; 
+            z-index: 2; 
+            box-shadow: 20px 40px 60px rgba(0,0,0,0.5);
+            opacity: 0.6;
+        }
+
+        .tablet-body.active { 
+            transform: rotateY(0deg) rotateX(0deg) scale(1); 
+            opacity: 1;
+            box-shadow: 0 0 50px rgba(0, 113, 227, 0.2), 0 30px 80px rgba(0,0,0,0.8);
+        }
+
+        .screen-content { width: 100%; height: 100%; background: #000; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .bg-img { width: 100%; height: 100%; object-fit: cover; position: absolute; transition: opacity 0.6s ease; }
+
+        /* --- Spec Cards Grid --- */
+        .specs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; width: 100%; max-width: 800px; margin-top: 50px; }
+        .spec-box { background: var(--glass); padding: 25px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); text-align: left; }
+        .spec-box h3 { font-size: 1.1rem; color: #fff; margin-bottom: 5px; }
+        .spec-box p { color: #86868b; font-size: 0.85rem; }
+
+        /* --- Edge Section --- */
+        .edge-icon-giant { position: absolute; width: 300px; right: -400px; top: 30%; z-index: 100; opacity: 0; transition: transform 2s ease, opacity 0.5s; pointer-events: none; }
+        .swiping { transform: translateX(-180vw) rotate(-25deg); opacity: 1; }
+        #browser-view { opacity: 0; background: #fff; z-index: 5; }
+
+        /* --- Money Rain --- */
+        #money-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; }
+        .money-particle { position: absolute; font-size: 2rem; top: -10%; will-change: transform; }
+        @keyframes moneyDrop {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* --- Price --- */
+        .price-tag { opacity: 0; transform: translateY(20px); transition: 1s ease; margin-top: 40px; }
+        .price-tag.show { opacity: 1; transform: translateY(0); }
+        .price-amount { font-size: 3.5rem; font-weight: 700; color: #fff; }
+        .buy-btn { display: inline-block; margin-top: 15px; padding: 15px 45px; background: var(--primary); color: white; border-radius: 30px; text-decoration: none; font-weight: 600; }
+
+        footer { padding: 60px; text-align: center; color: #555; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+    <div id="money-container"></div>
+
+    <nav>
+        <div class="logo">SpeedTab Extra 5G™ | ASAS's Fastest Tablet</div>
+        <ul class="nav-links">
+            <li><a href="#hero">Specs</a></li>
+            <li><a href="#win-section">OS</a></li>
+            <li><a href="#edge-section">Edge</a></li>
+            <li><a href="#price-section">Buy</a></li>
+        </ul>
+    </nav>
+
+    <section class="section-wrap" id="hero">
+        <h1>SpeedTab Extra 5G™</h1>
+        <p style="color:#86868b;">The Fastest Android™ Tablet We Ever Made...</p>
+        <div class="tablet-container">
+            <div class="tablet-body active">
+                <div class="screen-content">
+                    <img class="bg-img" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1000">
+                </div>
+            </div>
+        </div>
+
+        <div class="specs-grid">
+            <div class="spec-box"><h3>Qualcomm®</h3><p>Snapdragon 8 Elite</p></div>
+            <div class="spec-box"><h3>12000 mAh</h3><p>Large Battery</p></div>
+            <div class="spec-box"><h3>< 5 Minutes</h3><p>Super Fast Charge</p></div>
+            <div class="spec-box"><h3>8K OLED 120Hz</h3><p>D. Vision™ Display</p></div>
+            <div class="spec-box"><h3>D. Atmos™</h3><p>Quad Speakers</p></div>
+            <div class="spec-box"><h3>Turbo Memory</h3><p>32GB LPDDR5X</p></div>
+            <div class="spec-box"><h3>Large Storage</h3><p>5 TB eMMC</p></div>
+            <div class="spec-box"><h3>99 MP + 99 MP</h3><p>Ultra Clear IR Cam</p></div>
+            <div class="spec-box"><h3>2.4 & 5 GHz</h3><p>WLAN Supports</p></div>
+            <div class="spec-box"><h3>LTE & NR</h3><p>Cellular Supports</p></div>
+            <div class="spec-box"><h3>LTE Calling</h3><p>VoLTE Supports</p></div>
+            <div class="spec-box"><h3>NR Calling</h3><p>VoNR Supports</p></div>
+            <div class="spec-box"><h3>10.5" Inches</h3><p>Large 16:9 Display</p></div>
+            <div class="spec-box"><h3>On-Screen</h3><p>Fingerprint Sensor</p></div>
+            <div class="spec-box"><h3>Dual Sim Slots</h3><p>For Multi-usage</p></div>
+            <div class="spec-box"><h3>Wi-Fi™</h3><p>Version 7.0</p></div>
+            <div class="spec-box"><h3>Bluetooth®</h3><p>Version 6.0</p></div>
+            <div class="spec-box"><h3>Built-in</h3><p>IR Blaster</p></div>
+            <div class="spec-box"><h3>Built-in</h3><p>WPS Office®</p></div>
+            <div class="spec-box"><h3>Buttons</h3><p>~5 Millions Press</p></div>
+            <div class="spec-box"><h3>Lightweight</h3><p>~500 grams</p></div>
+            <div class="spec-box"><h3>Free ASAS</h3><p>APPS Business Plan</p></div>
+            <div class="spec-box"><h3>Bundles</h3><p>x1 Stylus</p></div>
+            <div class="spec-box"><h3>Warranty</h3><p>Expect 2 Year</p></div>
+        </div>
+    </section>
+
+    <section class="section-wrap" id="win-section" style="background: radial-gradient(circle at center, #001e3c 0%, #000 100%);">
+        <h1>Android 16™ + Windows™ 11 Dual Boot</h1>
+        <div class="tablet-container">
+            <div class="tablet-body" id="tab2">
+                <div class="screen-content">
+                    <img class="bg-img" style="opacity:0.3" src="https://i.ytimg.com/vi/RClD5UlO650/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLC4vgvovYgbKFiLDWOfZ-W8bu1COA">
+                    <img id="win-logo" style="width:60px; opacity:0; transform:scale(3); transition:1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275)" src="dual.png">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-wrap" id="edge-section">
+        <img id="edge-logo-giant" class="edge-icon-giant" src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Microsoft_Edge_logo_%282019%29.svg/500px-Microsoft_Edge_logo_%282019%29.svg.png">
+        <h1>Microsoft Edge™</h1>
+        <div class="tablet-container">
+            <div class="tablet-body" id="tab3">
+                <div class="screen-content">
+                    <img id="edge-screen-old" class="bg-img" src="https://play-lh.googleusercontent.com/EY1Uvq1qOHW0JyWIXOsEH2Zf6bVQo39QM8B1YajuseVF4NWEmlg_0w7H0h7e3uyxhw=w2560-h1440-rw">
+                    <div id="browser-view" class="bg-img">
+                        <img src="https://blogs.microsoft.com/wp-content/uploads/prod/sites/166/2020/01/Customize-Microsoft-Edge.jpg" style="width:100%; height:100%; object-fit:cover;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section-wrap" id="price-section">
+        <h1>Own the Tablet</h1>
+        <div class="tablet-container">
+            <div class="tablet-body" id="tab-price">
+                <div class="screen-content"><div style="font-size: 5rem;">💰</div></div>
+            </div>
+        </div>
+        <div class="price-tag" id="price-info">
+            <p style="color: #86868b; letter-spacing: 2px;">STARTING AT</p>
+            <div class="price-amount">RM 8999</div>
+            <a href="buy.html" class="buy-btn">Order Now</a>
+        </div>
+    </section>
+
+    <footer>© 2026 ASAS Technologies Inc.</footer>
+
+    <script>
+        const observerOptions = { threshold: 0.4 };
+
+        const winObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    document.getElementById('tab2').classList.add('active');
+                    setTimeout(() => {
+                        const logo = document.getElementById('win-logo');
+                        logo.style.opacity = '1';
+                        logo.style.transform = 'scale(1)';
+                    }, 600);
+                }
+            });
+        }, observerOptions);
+
+        const edgeObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    document.getElementById('tab3').classList.add('active');
+                    setTimeout(() => {
+                        document.getElementById('edge-logo-giant').classList.add('swiping');
+                        setTimeout(() => {
+                            document.getElementById('browser-view').style.opacity = '1';
+                        }, 800);
+                    }, 600);
+                }
+            });
+        }, observerOptions);
+
+        const priceObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    document.getElementById('tab-price').classList.add('active');
+                    setTimeout(() => {
+                        createMoneyRain();
+                        document.getElementById('price-info').classList.add('show');
+                    }, 800);
+                    priceObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        function createMoneyRain() {
+            const container = document.getElementById('money-container');
+            const currency = ['💵', '💰', '💸', '🤑'];
+            for(let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const money = document.createElement('div');
+                    money.className = 'money-particle';
+                    money.innerText = currency[Math.floor(Math.random() * currency.length)];
+                    money.style.left = (Math.random() * 90 + 5) + 'vw';
+                    const duration = 1.5 + Math.random();
+                    money.style.animation = `moneyDrop ${duration}s linear forwards`;
+                    container.appendChild(money);
+                    setTimeout(() => money.remove(), duration * 1000);
+                }, i * 60);
+            }
+        }
+
+        winObserver.observe(document.getElementById('win-section'));
+        edgeObserver.observe(document.getElementById('edge-section'));
+        priceObserver.observe(document.getElementById('price-section'));
+    </script>
+</body>
+</html>

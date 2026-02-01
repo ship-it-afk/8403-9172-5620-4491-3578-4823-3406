@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+    <title>Buy ASAS Products</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --accent: #818cf8;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --success: #10b981;
+            --glass-bg: rgba(15, 23, 42, 0.6); 
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg); 
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        /* --- CUSTOM RIGHT CLICK MENU --- */
+        #custom-context-menu {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            width: 180px;
+            background: rgba(30, 41, 59, 0.9);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            padding: 8px 0;
+        }
+
+        .context-menu-item {
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-main);
+            transition: background 0.2s;
+        }
+
+        .context-menu-item:hover {
+            background: rgba(129, 140, 248, 0.2);
+            color: var(--accent);
+        }
+
+        /* --- NAVIGATION --- */
+        nav {
+            width: 100%;
+            height: 75px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container { max-width: 1100px; width: 100%; padding: 0 20px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-weight: 800; font-size: 1.4rem; color: var(--text-main); text-decoration: none; letter-spacing: -1px; }
+        .nav-links { display: flex; gap: 30px; }
+        .nav-links a { text-decoration: none; color: var(--text-dim); font-weight: 600; font-size: 0.9rem; transition: 0.3s; }
+        .nav-links a:hover { color: var(--accent); }
+        .nav-links a.active { color: var(--accent); }
+
+        /* --- HERO POSTER --- */
+        .hero-poster {
+            width: 100%;
+            max-width: 1100px;
+            height: 380px;
+            margin: 20px 0;
+            position: relative;
+            border-radius: 32px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #312e81 0%, #1e1b4b 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+
+        .hero-poster img {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.4;
+            filter: blur(2px);
+        }
+
+        .hero-text {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .hero-text h2 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -2px;
+            background: linear-gradient(to bottom, #ffffff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-text p {
+            font-size: 1.2rem;
+            color: var(--accent);
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        /* --- CONTENT AREA --- */
+        .container { max-width: 1100px; width: 100%; padding: 0 20px; padding-bottom: 120px; }
+        header { text-align: center; margin: 60px 0; }
+        h1 { font-size: 2.5rem; font-weight: 800; background: linear-gradient(to right, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; }
+        header p { color: var(--text-dim); margin-top: 10px; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-bottom: 60px; }
+        .card { background: var(--surface); border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; display: flex; flex-direction: column; }
+        .card:hover { transform: translateY(-10px); border-color: var(--accent); }
+        .image-container { width: 100%; height: 240px; overflow: hidden; position: relative; }
+        .card img { width: 100%; height: 100%; object-fit: cover; }
+
+        .card-content { padding: 24px; flex-grow: 1; display: flex; flex-direction: column; }
+        .price { font-size: 1.5rem; font-weight: 800; color: var(--text-main); display: block; margin-bottom: 20px; }
+
+        .qty-selector { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.2); border-radius: 10px; padding: 5px 15px; margin-bottom: 15px; }
+        .qty-btn { background: none; border: none; color: var(--accent); font-size: 1.5rem; font-weight: 800; cursor: pointer; }
+        
+        button.add-btn { width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--accent); color: white; font-weight: 700; cursor: pointer; transition: 0.2s; }
+
+        /* --- CART --- */
+        .cart-wrapper { position: fixed; bottom: 30px; right: 30px; width: 400px; max-width: calc(100vw - 60px); z-index: 2000; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .cart-container { background: rgba(30, 41, 59, 0.8); backdrop-filter: blur(20px); border-radius: 24px; padding: 24px; border: 1px solid var(--glass-border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; }
+
+        .cart-wrapper.collapsed .cart-content-area { display: none; }
+        .cart-wrapper.collapsed .cart-container { padding: 15px 24px; cursor: pointer; }
+        .cart-header { display: flex; justify-content: space-between; align-items: center; }
+
+        .cart-list { max-height: 200px; overflow-y: auto; margin: 20px 0 10px 0; }
+        .cart-item { display: flex; justify-content: space-between; padding: 10px 0; color: var(--text-dim); font-size: 0.9rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        
+        .voucher-section { display: flex; gap: 10px; margin-bottom: 15px; padding-top: 10px; }
+        .voucher-input { flex-grow: 1; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; padding: 8px 12px; font-family: inherit; outline: none; }
+        .redeem-btn { background: var(--accent); border: none; color: white; border-radius: 8px; padding: 0 15px; font-weight: 600; cursor: pointer; }
+
+        .discount-row { display: flex; justify-content: space-between; color: var(--success); font-weight: 600; font-size: 0.9rem; padding: 5px 0; }
+        .total-row { display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: 800; margin-top: 15px; margin-bottom: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px; }
+        .checkout-btn { width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--success); color: white; font-weight: 700; cursor: pointer; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    </style>
+</head>
+<body oncontextmenu="return false;">
+
+    <div id="custom-context-menu">
+        <div class="context-menu-item" onclick="location.reload()">Reload Page</div>
+        <div class="context-menu-item" onclick="toggleCart()">Toggle Cart</div>
+        <div class="context-menu-item" onclick="hideMenu()">Close Menu</div>
+    </div>
+
+    <nav>
+        <div class="nav-container">
+            <a href="#" class="logo">ASAS</a>
+            <div class="nav-links">
+                <a href="buy.html" class="active">Shop</a>
+                <a href="index.html">Mainpage</a>
+                <a href="software.html">Softwares</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="hero-poster">
+        <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=2070&auto=format&fit=crop" alt="Hero Poster Image">
+        <div class="hero-text">
+            <h2>BIG PURCHASES, BIGGER REWARDS!!</h2>
+            <p>Get RM 50 off any single item above RM 5,000</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>Available ASAS Products</h1>
+            <p>Premium devices for the future era.</p>
+        </header>
+        <div class="grid" id="product-grid"></div>
+        
+        <div class="cart-wrapper collapsed" id="cart-wrapper">
+            <div class="cart-container" onclick="toggleCart(event)">
+                <div class="cart-header">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <h3>Cart</h3>
+                        <span id="count-badge" style="background: var(--accent); padding: 2px 10px; border-radius: 20px; font-size: 0.75rem;">0 Items</span>
+                    </div>
+                    <span id="toggle-icon">▲</span>
+                </div>
+                <div class="cart-content-area" onclick="event.stopPropagation()">
+                    <div id="cart-list" class="cart-list"><p style="color: var(--text-dim); text-align: center;">Your cart is empty.</p></div>
+                    <div class="voucher-section">
+                        <input type="text" id="voucher-code" class="voucher-input" placeholder="7-digit code" maxlength="7">
+                        <button class="redeem-btn" onclick="applyVoucher()">Redeem</button>
+                    </div>
+                    <div id="discount-area"></div>
+                    <div class="total-row"><span>Total</span><span id="total">RM 0.00</span></div>
+                    <button class="checkout-btn" onclick="checkout()">Checkout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONTEXT MENU LOGIC ---
+        const menu = document.getElementById('custom-context-menu');
+        window.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            menu.style.display = 'block';
+            menu.style.left = `${e.pageX}px`;
+            menu.style.top = `${e.pageY}px`;
+        });
+
+        window.addEventListener('click', () => hideMenu());
+        function hideMenu() { menu.style.display = 'none'; }
+
+        // --- PRODUCT & CART LOGIC ---
+        const PRODUCTS = [
+            { id: 1, name: "LiveStudio B3 Series", price: 999, img: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=500" },
+            { id: 2, name: "S-Series Smartwatch", price: 450, img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500" },
+            { id: 3, name: "UltraWide Monitor", price: 899, img: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=500" },
+            { id: 4, name: "PaperBook 16", price: 29999, img: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=800" },
+            { id: 5, name: "C. Phone L10", price: 4999, img: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800" },
+            { id: 6, name: "Tab C10 Pro", price: 5799, img: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=800" },
+            { id: 7, name: "PaperTab ProPlus Max", price: 9999, img: "https://images.pexels.com/photos/3082341/pexels-photo-3082341.jpeg" },
+            { id: 8, name: "SpeedTab Extra", price: 10999, img: "https://www.choice.com.au/wp-content/uploads/2018/08/BG-tablet-computers.jpg?w=1024" },
+            { id: 9, name: "BuzzTab", price: 999, img: "https://img.freepik.com/free-photo/man-checking-stock-market-data-tablet_181624-57887.jpg" },
+            { id: 10, name: "Phone T3", price: 6999, img: "https://st.depositphotos.com/2129603/3474/i/450/depositphotos_34744909-stock-photo-woman-using-her-mobile-phone.jpg" },
+            { id: 11, name: "BuzzBook", price: 999, img: "https://t4.ftcdn.net/jpg/04/43/96/81/360_F_443968179_INl2WaFOKQgOf6VSEVafirGf5Sw7VAJ4.jpg" },
+            { id: 12, name: "StandardBook P1", price: 3999, img: "https://t3.ftcdn.net/jpg/04/46/75/66/360_F_446756617_kcHDzS3BBEmQlAcEdu5BClAkVt8jDk1o.jpg" }
+        ];
+
+        let cart = {};
+        let productQtys = {}; 
+        let activeVoucher = null;
+        PRODUCTS.forEach(p => productQtys[p.id] = 1);
+
+        function toggleCart() {
+            const wrapper = document.getElementById('cart-wrapper');
+            const icon = document.getElementById('toggle-icon');
+            wrapper.classList.toggle('collapsed');
+            icon.textContent = wrapper.classList.contains('collapsed') ? '▲' : '▼';
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = PRODUCTS.map(p => `
+                <div class="card">
+                    <div class="image-container"><img src="${p.img}" alt="${p.name}"></div>
+                    <div class="card-content">
+                        <h3>${p.name}</h3>
+                        <span class="price">RM ${p.price.toLocaleString()}</span>
+                        <div class="qty-selector">
+                            <button class="qty-btn" onclick="updatePicker(${p.id}, -1)">-</button>
+                            <span id="qty-display-${p.id}">1</span>
+                            <button class="qty-btn" onclick="updatePicker(${p.id}, 1)">+</button>
+                        </div>
+                        <button class="add-btn" onclick="addToCart(${p.id})">Add to Cart</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updatePicker(id, change) {
+            productQtys[id] = Math.max(1, productQtys[id] + change);
+            document.getElementById(`qty-display-${id}`).textContent = productQtys[id];
+        }
+
+        function addToCart(productId) {
+            const product = PRODUCTS.find(p => p.id === productId);
+            const quantity = productQtys[productId];
+            if (cart[productId]) { cart[productId].qty += quantity; } 
+            else { cart[productId] = { ...product, qty: quantity }; }
+            
+            const wrapper = document.getElementById('cart-wrapper');
+            if (wrapper.classList.contains('collapsed')) toggleCart();
+            updateCartUI();
+        }
+
+        function applyVoucher() {
+            const code = document.getElementById('voucher-code').value.toUpperCase();
+            if (code === "RECYCLE" || code === "SYOK10") {
+                activeVoucher = code;
+                alert(`Voucher ${code} Applied!`);
+            } else { activeVoucher = null; alert("Invalid Voucher"); }
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const list = document.getElementById('cart-list');
+            const totalEl = document.getElementById('total');
+            const badge = document.getElementById('count-badge');
+            const discountArea = document.getElementById('discount-area');
+            
+            const cartItems = Object.values(cart);
+            let subtotal = 0;
+            let totalItems = 0;
+            let discountHTML = '';
+
+            if (cartItems.length === 0) {
+                list.innerHTML = '<p style="color: var(--text-dim); text-align: center;">Your cart is empty.</p>';
+                discountArea.innerHTML = '';
+            } else {
+                list.innerHTML = cartItems.map(item => {
+                    subtotal += item.price * item.qty;
+                    totalItems += item.qty;
+                    return `<div class="cart-item"><span>${item.qty}x ${item.name}</span><span>RM ${(item.price * item.qty).toLocaleString()}</span></div>`;
+                }).join('');
+
+                let finalTotal = subtotal;
+                if (subtotal >= 8000) { discountHTML += `<div class="discount-row"><span>Bulk Reward</span><span>- RM 50.00</span></div>`; finalTotal -= 50; }
+                if (activeVoucher === "RECYCLE") { let amt = finalTotal * 0.10; discountHTML += `<div class="discount-row"><span>RECYCLE (10%)</span><span>- RM ${amt.toLocaleString()}</span></div>`; finalTotal -= amt; }
+                else if (activeVoucher === "SYOK10") { discountHTML += `<div class="discount-row"><span>SYOK10</span><span>- RM 10.00</span></div>`; finalTotal -= 10; }
+
+                discountArea.innerHTML = discountHTML;
+                totalEl.textContent = `RM ${Math.max(0, finalTotal).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+            }
+            badge.textContent = `${totalItems} Items`;
+        }
+
+        function checkout() {
+            if (Object.keys(cart).length === 0) return;
+            document.body.style.opacity = '0';
+            setTimeout(() => { window.location.href = "payment.html"; }, 500);
+        }
+
+        renderProducts();
+    </script>
+</body>
+</html>
