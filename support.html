@@ -93,7 +93,7 @@
             <span>AI</span>
         </a>
 
-        <a href="https://www.royal.com" class="support-btn" id="expert-btn">
+        <a href="expert.html" class="support-btn" id="expert-btn">
             <img src="https://cdn-icons-png.flaticon.com/512/1904/1904425.png" alt="Expert Icon">
             <span id="expert-text">Expert</span>
         </a>
@@ -108,7 +108,7 @@
             const hour = now.getHours();
 
             // Condition: Disable if hour is 21 (9PM) or later, OR earlier than 7 (7AM)
-            if (hour >= 23 || hour < 6) {
+            if (hour >= 22 || hour < 8) {
                 expertBtn.classList.add('disabled');
                 // Prevent clicking
                 expertBtn.onclick = function(e) {
@@ -116,7 +116,7 @@
                     return false;
                 };
                 // Change text
-                expertText.innerHTML = "Expert Support<br><small>Not available between 11PM to 6AM</small>";
+                expertText.innerHTML = "Expert Support<br><small>Not available between 10PM to 8AM</small>";
             }
         }
 
