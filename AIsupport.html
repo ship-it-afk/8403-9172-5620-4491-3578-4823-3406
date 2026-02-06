@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASAS AI Technical Support (Preview)</title>
+    <style>
+        :root {
+            --glass: rgba(255, 255, 255, 0.07);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --user-bubble: rgba(0, 210, 255, 0.2);
+            --ai-bubble: rgba(255, 255, 255, 0.05);
+            --accent: #00d2ff;
+            --text: #f0f0f0;
+            --nav-height: 70px;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #050505;
+            color: var(--text);
+            overflow: hidden;
+        }
+
+        /* Animated Mesh Background */
+        body::before {
+            content: "";
+            position: absolute;
+            inset: -50%;
+            background: radial-gradient(circle at 20% 30%, #1a2a6c, transparent 30%),
+                        radial-gradient(circle at 80% 20%, #b21f1f, transparent 30%),
+                        radial-gradient(circle at 50% 80%, #00d2ff, transparent 30%);
+            filter: blur(100px);
+            z-index: -1;
+            animation: moveBackground 25s infinite alternate ease-in-out;
+        }
+
+        @keyframes moveBackground {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(10%, 10%) rotate(10deg); }
+        }
+
+        /* --- Navigation Bar --- */
+        nav {
+            width: 100%;
+            height: var(--nav-height);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            z-index: 1000;
+        }
+
+        .nav-content {
+            width: 90%;
+            max-width: 1200px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            color: var(--accent);
+            text-shadow: 0 0 15px rgba(0, 210, 255, 0.5);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            transition: 0.3s;
+            position: relative;
+            padding: 8px 0;
+        }
+
+        .nav-links a:hover {
+            color: #fff;
+        }
+
+        /* Active Highlight */
+        .nav-links a.active {
+            color: var(--accent);
+        }
+
+        .nav-links a.active::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent);
+            border-radius: 2px;
+        }
+
+        /* Main Container Adjustment */
+        .chat-container {
+            width: 95%;
+            max-width: 600px;
+            height: calc(85vh - var(--nav-height));
+            margin-top: 30px;
+            background: var(--glass);
+            backdrop-filter: blur(30px) saturate(200%);
+            -webkit-backdrop-filter: blur(30px) saturate(200%);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        /* Chat Header */
+        .header {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid var(--glass-border);
+            font-weight: 300;
+            font-size: 12px;
+            letter-spacing: 2px;
+            background: rgba(0, 0, 0, 0.2);
+            color: rgba(255,255,255,0.5);
+        }
+
+        /* History Area */
+        #chatHistory {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            scrollbar-width: none;
+        }
+        #chatHistory::-webkit-scrollbar { display: none; }
+
+        /* Message Bubbles */
+        .message {
+            max-width: 80%;
+            padding: 12px 18px;
+            border-radius: 18px;
+            font-size: 15px;
+            line-height: 1.5;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        .user-msg {
+            align-self: flex-end;
+            background: var(--user-bubble);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            border-bottom-right-radius: 4px;
+        }
+
+        .ai-msg {
+            align-self: flex-start;
+            background: var(--ai-bubble);
+            border: 1px solid var(--glass-border);
+            border-bottom-left-radius: 4px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Input Area */
+        .input-area {
+            padding: 20px;
+            background: rgba(0,0,0,0.3);
+            display: flex;
+            gap: 10px;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 14px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            color: white;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        button {
+            padding: 0 25px;
+            background: var(--accent);
+            border: none;
+            border-radius: 15px;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px var(--accent);
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="nav-content">
+        <div class="logo">ASAS AI Technical Support (Preview)</div>
+        <div class="nav-links">
+            <a href="index.html">HOME</a>
+            <a href="#" class="active">SUPPORT</a>
+            <a href="expert.html">EXPERT</a>
+        </div>
+    </div>
+</nav>
+
+<div class="chat-container">
+    <div class="header">ASAS AI Technical Support (PREVIEW)</div>
+    
+    <div id="chatHistory">
+        <div class="message ai-msg">AI ready. How can I assist you today?</div>
+    </div>
+
+    <div class="input-area">
+        <input type="text" id="userInput" placeholder="Ask something..." autocomplete="off">
+        <button onclick="askBot()">SEND</button>
+    </div>
+</div>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw6slSqZuKvpv2D1eT6TqFCUJbO3LkOLhb52oVPBIXiyK2w8ix43QvuLU8qOinCUOCg/exec";
+
+    const inputField = document.getElementById('userInput');
+    const chatHistory = document.getElementById('chatHistory');
+
+    inputField.addEventListener("keypress", (e) => { if (e.key === "Enter") askBot(); });
+
+    async function askBot() {
+        const text = inputField.value.trim();
+        if (!text) return;
+
+        appendMessage(text, 'user-msg');
+        inputField.value = "";
+
+        const loadingMsg = appendMessage("Thinking...", 'ai-msg');
+
+        try {
+            const finalUrl = `${SCRIPT_URL}?text=${encodeURIComponent(text)}`;
+            const response = await fetch(finalUrl);
+            const data = await response.text();
+            loadingMsg.innerText = data;
+        } catch (error) {
+            loadingMsg.innerText = "Error connecting to neural grid.";
+        }
+
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+    }
+
+    function appendMessage(text, className) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message ${className}`;
+        msgDiv.innerText = text;
+        chatHistory.appendChild(msgDiv);
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+        return msgDiv;
+    }
+</script>
+
+</body>
+</html>

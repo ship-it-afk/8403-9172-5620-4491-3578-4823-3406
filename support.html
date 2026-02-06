@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support Selection</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+
+        h1 {
+            margin-bottom: 40px;
+            font-weight: 300;
+            text-align: center;
+        }
+
+        .container {
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .support-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 220px;
+            height: 220px;
+            text-decoration: none;
+            color: #ffffff;
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            text-align: center;
+            padding: 10px;
+        }
+
+        .support-btn:not(.disabled):hover {
+            transform: translateY(-8px);
+            border-color: #bb86fc;
+            background-color: #252525;
+            box-shadow: 0 0 15px rgba(187, 134, 252, 0.3);
+        }
+
+        /* Styling for the disabled state */
+        .support-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            filter: grayscale(1);
+            border-color: #444;
+        }
+
+        .support-btn img {
+            width: 70px;
+            height: 70px;
+            margin-bottom: 20px;
+            filter: brightness(0) invert(1); 
+        }
+
+        .support-btn span {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        .support-btn small {
+            display: block;
+            font-size: 0.8rem;
+            margin-top: 10px;
+            color: #ff6b6b;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Please select a support method</h1>
+
+    <div class="container">
+        <a href="term.html" class="support-btn" id="ai-btn">
+            <img src="https://cdn-icons-png.flaticon.com/512/2103/2103633.png" alt="AI Icon">
+            <span>AI</span>
+        </a>
+
+        <a href="https://www.royal.com" class="support-btn" id="expert-btn">
+            <img src="https://cdn-icons-png.flaticon.com/512/1904/1904425.png" alt="Expert Icon">
+            <span id="expert-text">Expert</span>
+        </a>
+    </div>
+
+    <script>
+        function checkAvailability() {
+            const expertBtn = document.getElementById('expert-btn');
+            const expertText = document.getElementById('expert-text');
+            
+            const now = new Date();
+            const hour = now.getHours();
+
+            // Condition: Disable if hour is 21 (9PM) or later, OR earlier than 7 (7AM)
+            if (hour >= 23 || hour < 6) {
+                expertBtn.classList.add('disabled');
+                // Prevent clicking
+                expertBtn.onclick = function(e) {
+                    e.preventDefault();
+                    return false;
+                };
+                // Change text
+                expertText.innerHTML = "Expert Support<br><small>Not available between 11PM to 6AM</small>";
+            }
+        }
+
+        // Run on page load
+        checkAvailability();
+    </script>
+
+</body>
+</html>
