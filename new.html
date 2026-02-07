@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What's New - V3.0</title>
+    <style>
+        :root {
+            --primary: #818cf8; /* Softer purple for dark backgrounds */
+            --bg: #0f172a;      /* Deep slate background */
+            --card-bg: #1e293b; /* Slightly lighter slate for cards */
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --tag-new: rgba(34, 197, 94, 0.2);
+            --tag-new-text: #4ade80;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        h1 { font-size: 2.5rem; margin-bottom: 10px; color: #fff; }
+        header p { color: var(--text-muted); font-size: 1.1rem; }
+
+        /* Timeline Styles */
+        .changelog-item {
+            position: relative;
+            padding-left: 40px;
+            margin-bottom: 60px;
+            border-left: 2px solid var(--border);
+        }
+
+        .changelog-item::before {
+            content: '';
+            position: absolute;
+            left: -9px;
+            top: 0;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary); /* Neon glow effect */
+            border: 4px solid var(--bg);
+        }
+
+        .date {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 28px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover { 
+            transform: translateY(-4px); 
+            border-color: #475569;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            background: var(--tag-new);
+            color: var(--tag-new-text);
+            text-transform: uppercase;
+        }
+
+        h2 { margin: 0 0 12px 0; font-size: 1.4rem; color: #fff; }
+        
+        ul { padding-left: 20px; margin-top: 15px; color: var(--text-muted); }
+        li { margin-bottom: 10px; }
+        li::marker { color: var(--primary); }
+
+        /* Image styling */
+        .changelog-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid var(--border);
+            display: block;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 80px;
+            padding-bottom: 40px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>What's New - V3.0</h1>
+            <p>The latest updates and improvements to the ASAS's websites and platforms.</p>
+        </header>
+
+        <div class="changelog-item">
+            <div class="date">February 6, 2026</div>
+            <div class="card">
+                <span class="badge">New Feature</span>
+                <h2>Version 3.0</h2>
+                <p>We've launched our experimental AI Technical Support engine that supports technical issues by 24 hours!!</p>
+                <img src="docs\image1.png?auto=format&fit=crop&q=80&w=800" alt="Holographic Interface" class="changelog-img">
+                <ul>
+                    <li>AI-powered Technical Supports</li>
+                    <li>24 Hours Operating Time</li>
+                    <li>Smart & Fix Technical Issues For FREE!!</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="changelog-item">
+            <div class="date">February 4, 2026</div>
+            <div class="card">
+                <span class="badge" style="background:rgba(56, 189, 248, 0.2); color:#7dd3fc;">Improvement</span>
+                <h2>Version 2.0</h2>
+                <p>The first version update was released!! Added ASAS's Softwares.</p>
+                <img src="docs\image2.png?auto=format&fit=crop&q=80&w=800" alt="Data streams and speed" class="changelog-img">
+                <ul>
+                    <li>Up to 10+ ASAS useful software!!</li>
+                    <li>Natural language processing (NLP) support for ASAS software</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="changelog-item">
+            <div class="date">January 31, 2026</div>
+            <div class="card">
+                <span class="badge" style="background:rgba(255, 255, 255, 0.2); color:#FFFFFF;">FIRST VERSION</span>
+                <h2>Version 1.0</h2>
+                <p>The first ASAS's website and platforms version was released!!</p>
+                <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800" alt="Data streams and speed" class="changelog-img">
+                <ul>
+                    <li>Simple User Interface</li>
+                    <li>No ASAS Softwares</li>
+                </ul>
+            </div>
+        </div>
+
+
+
+        <footer>
+            © 2026 ASAS Technologies. All rights reserved. (Version 3.0)<br>
+            <a href="fu.html" style="color: var(--primary); text-decoration: none;">Future Update Plans →</a>
+        </footer>
+    </div>
+
+</body>
+</html>

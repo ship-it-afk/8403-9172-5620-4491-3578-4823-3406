@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What's Next - V3.0</title>
+    <style>
+        :root {
+            --primary: #818cf8; /* Softer purple for dark backgrounds */
+            --bg: #0f172a;      /* Deep slate background */
+            --card-bg: #1e293b; /* Slightly lighter slate for cards */
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --tag-new: rgba(34, 197, 94, 0.2);
+            --tag-new-text: #4ade80;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        h1 { font-size: 2.5rem; margin-bottom: 10px; color: #fff; }
+        header p { color: var(--text-muted); font-size: 1.1rem; }
+
+        /* Timeline Styles */
+        .changelog-item {
+            position: relative;
+            padding-left: 40px;
+            margin-bottom: 60px;
+            border-left: 2px solid var(--border);
+        }
+
+        .changelog-item::before {
+            content: '';
+            position: absolute;
+            left: -9px;
+            top: 0;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary); /* Neon glow effect */
+            border: 4px solid var(--bg);
+        }
+
+        .date {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 28px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover { 
+            transform: translateY(-4px); 
+            border-color: #475569;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            margin-bottom: 12px;
+            background: var(--tag-new);
+            color: var(--tag-new-text);
+            text-transform: uppercase;
+        }
+
+        h2 { margin: 0 0 12px 0; font-size: 1.4rem; color: #fff; }
+        
+        ul { padding-left: 20px; margin-top: 15px; color: var(--text-muted); }
+        li { margin-bottom: 10px; }
+        li::marker { color: var(--primary); }
+
+        /* Image styling */
+        .changelog-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid var(--border);
+            display: block;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 80px;
+            padding-bottom: 40px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>What's Next - V3.0</h1>
+            <p>Our updates and improvements plans to the ASAS's websites and platforms.</p>
+        </header>
+
+        <div class="changelog-item">
+            <div class="date">Expected February 8, 2026</div>
+            <div class="card">
+                <span class="badge">NEW ASAS OFFICE SUITES</span>
+                <h2>Version 4.0</h2>
+                <p>Launches our experimental ASAS's OFFICE SUITES V1.0 like ASAS Writer, ASAS Presenter, ASAS Spreadsheets and more...</p>
+                <img src="https://theinterngroup.com/hubfs/Imported_Blog_Media/domenico-loia-hGV2TfOh0ns-unsplash.jpg?auto=format&fit=crop&q=80&w=800" alt="Holographic Interface" class="changelog-img">
+                <ul>
+                    <li>AI-powered Workspace</li>
+                    <li>24 Hours Usable</li>
+                    <li>14-days Try For FREE!!</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="changelog-item">
+            <div class="date">Expected February 10, 2026</div>
+            <div class="card">
+                <span class="badge" style="background:rgba(56, 189, 248, 0.2); color:#7dd3fc;">NEW ASAS Vidcall</span>
+                <h2>Version 5.0</h2>
+                <p>Launches our ASAS Vidcall</p>
+                <img src="https://media.istockphoto.com/id/1405689267/photo/student-girl-in-headphones-making-video-call.jpg?s=612x612&w=0&k=20&c=X_tvHaDdKWS6OCgq0Z554gXzb3rjITtc6K3QPnzbY9E=" alt="Data streams and speed" class="changelog-img">
+                <ul>
+                    <li>Up to 2 hours for one single meeting / video calling</li>
+                    <li>Up to 10+ participants allowed in one single meeting / video calling</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="changelog-item">
+            <div class="date">Expected February 15, 2026</div>
+            <div class="card">
+                <span class="badge" style="background:rgba(255, 255, 255, 0.2); color:#FFFFFF;">NEW ASAS CLOUD</span>
+                <h2>Version 6.0</h2>
+                <p>Introduces and launches the ASAS Cloud for 1MB/each person freemium plan...</p>
+                <img src="https://i.pcmag.com/imagery/roundups/03yy022DDsenwhBBYdxvwDi-3.fit_lim.size_1200x630.v1593631883.jpg" alt="Data streams and speed" class="changelog-img">
+                <ul>
+                    <li>1 MB Total Cloud Storage</li>
+                </ul>
+            </div>
+        </div>
+
+
+
+        <footer>
+            © 2026 ASAS Technologies. All rights reserved. (Version 3.0)<br>
+            <a href="new.html" style="color: var(--primary); text-decoration: none;">What's New & Release Notes →</a>
+        </footer>
+    </div>
+
+</body>
+</html>
