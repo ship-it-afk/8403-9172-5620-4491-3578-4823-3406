@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="images/note.png">
+    <title>ASAS CloudNotes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #6366f1;
+            --bg-dark: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --danger: #f43f5e;
+            --success: #10b981;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at top left, #1e1b4b, var(--bg-dark));
+            color: white;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        input {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 14px;
+            margin: 10px 0;
+            border-radius: 12px;
+            color: white;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        button {
+            cursor: pointer;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .btn-primary { background: var(--accent); color: white; width: 100%; padding: 14px; margin-top: 10px; }
+        .btn-primary:hover { background: #4f46e5; transform: scale(1.02); }
+
+        /* Dashboard Styles */
+        .profile-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .credit-badge {
+            background: linear-gradient(45deg, var(--accent), #a855f7);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 14px;
+        }
+
+        .note-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .note-header { font-size: 11px; color: #94a3b8; font-weight: 800; letter-spacing: 1px; margin-bottom: 6px; }
+        .note-text { font-size: 15px; color: #e2e8f0; margin-bottom: 12px; line-height: 1.5; }
+
+        .note-actions { display: flex; gap: 8px; }
+        .btn-edit { background: rgba(255,255,255,0.1); color: white; flex: 1; padding: 10px; font-size: 13px; }
+        .btn-del { background: rgba(244, 63, 94, 0.15); color: var(--danger); padding: 10px 15px; }
+        .btn-del:hover { background: var(--danger); color: white; }
+
+        /* Buy Modal */
+        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(8px); }
+        .modal { background: #1e293b; padding: 32px; border-radius: 24px; width: 340px; text-align: center; border: 1px solid var(--accent); }
+
+        .hidden { display: none; }
+        .price-tag { font-size: 28px; font-weight: 800; color: var(--success); margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="glass-card">
+        <div id="auth-ui">
+            <h2 style="margin-top:0; font-size: 28px;">ASAS <span style="color:var(--accent)">CloudNotes</span></h2>
+            <p style="color: #94a3b8; margin-bottom: 30px;">Secure note management simplified.</p>
+            <input type="text" id="reg-user" placeholder="Name" class="hidden">
+            <input type="email" id="email" placeholder="Email Address">
+            <input type="password" id="pass" placeholder="Password">
+            <button onclick="handleAuth()" class="btn-primary" id="btn-text">Log In</button>
+            <p onclick="toggleAuth()" style="text-align:center; color: var(--accent); cursor:pointer; margin-top:20px; font-size: 14px;" id="toggle-text">New account? Sign Up</p>
+        </div>
+
+        <div id="dash-ui" class="hidden">
+            <div class="profile-bar">
+                <div>
+                    <div style="color: #94a3b8; font-size: 12px;">Welcome back,</div>
+                    <div id="user-name" style="font-size: 20px; font-weight: 800;">User</div>
+                </div>
+                <div class="credit-badge">🪙 <span id="user-credits">0</span></div>
+            </div>
+
+            <div id="notes-container"></div>
+            
+            <button onclick="location.reload()" style="background:none; color:#64748b; width:100%; margin-top:20px; font-size: 13px; text-decoration: underline;">Secure Logout</button>
+        </div>
+    </div>
+</div>
+
+<div id="buy-modal" class="overlay hidden">
+    <div class="modal">
+        <h3 style="margin-top:0">Refill Credits</h3>
+        <p style="color:#94a3b8; font-size: 14px;">10 Credits = RM 5.00</p>
+        <input type="number" id="buy-qty" placeholder="Amount (e.g. 20)" oninput="calcPrice(this.value)" style="text-align:center;">
+        <div class="price-tag">RM <span id="price-val">0.00</span></div>
+        <button onclick="processBuy()" class="btn-primary" style="background: var(--success);">Confirm Purchase</button>
+        <button onclick="closeModal()" style="background:none; color:#94a3b8; margin-top:10px; width:100%;">Close</button>
+    </div>
+</div>
+
+<script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbzky9AZ63NSmL73zV-UHQXUQAgF7KOZfOt5Gn2ujtaDkYlX4JtGWa8hMBdyEM-2xSxl/exec"; 
+    let isSignup = false;
+    let user = null;
+
+    function toggleAuth() {
+        isSignup = !isSignup;
+        document.getElementById('reg-user').classList.toggle('hidden');
+        document.getElementById('btn-text').innerText = isSignup ? "Create Account" : "Log In";
+        document.getElementById('toggle-text').innerText = isSignup ? "Already have an account? Log In" : "New account? Sign Up";
+    }
+
+    async function handleAuth() {
+        const payload = {
+            action: isSignup ? "signup" : "login",
+            username: document.getElementById('reg-user').value,
+            address: document.getElementById('email').value,
+            password: document.getElementById('pass').value
+        };
+
+        const res = await fetch(API_URL, { method: "POST", body: JSON.stringify(payload) });
+        const data = await res.json();
+        if(data.status === "success") {
+            if(isSignup) { alert("Account created!"); toggleAuth(); }
+            else { user = data; render(); }
+        } else { alert(data.message); }
+    }
+
+    function render() {
+        document.getElementById('auth-ui').classList.add('hidden');
+        document.getElementById('dash-ui').classList.remove('hidden');
+        document.getElementById('user-name').innerText = user.username;
+        document.getElementById('user-credits').innerText = user.credits;
+
+        const list = document.getElementById('notes-container');
+        list.innerHTML = "";
+        user.notes.forEach((txt, i) => {
+            const div = document.createElement('div');
+            div.className = "note-card";
+            div.innerHTML = `
+                <div class="note-header">SLOT 0${i+1}</div>
+                <div class="note-text">${txt || '<span style="color:#475569">No data stored...</span>'}</div>
+                <div class="note-actions">
+                    <button class="btn-edit" onclick="editNote(${i})">Edit (-5🪙)</button>
+                    <button class="btn-del" onclick="delNote(${i})">🗑️</button>
+                </div>`;
+            list.appendChild(div);
+        });
+
+        if(user.credits < 5) document.getElementById('buy-modal').classList.remove('hidden');
+    }
+
+    async function editNote(i) {
+        if(user.credits < 5) { document.getElementById('buy-modal').classList.remove('hidden'); return; }
+        const content = prompt("Enter Note Content:");
+        if(!content) return;
+        const res = await fetch(API_URL, { method: "POST", body: JSON.stringify({action:"updateNote", row:user.row, noteIndex:i, content})});
+        const data = await res.json();
+        if(data.status === "success") { user.credits -= 5; user.notes[i] = content; render(); }
+    }
+
+    async function delNote(i) {
+        if(!confirm("Clear this slot? (Free)")) return;
+        const res = await fetch(API_URL, { method: "POST", body: JSON.stringify({action:"deleteNote", row:user.row, noteIndex:i})});
+        const data = await res.json();
+        if(data.status === "success") { user.notes[i] = ""; render(); }
+    }
+
+    function calcPrice(v) { document.getElementById('price-val').innerText = (v * 0.5).toFixed(2); }
+
+    async function processBuy() {
+        const amt = document.getElementById('buy-qty').value;
+        if(!amt || amt <= 0) return;
+        const res = await fetch(API_URL, { method: "POST", body: JSON.stringify({action:"buyCredits", row:user.row, amount:amt})});
+        const data = await res.json();
+        if(data.status === "success") { alert("Payment Verified!"); window.location.href = "https://google.com"; }
+    }
+
+    function closeModal() { document.getElementById('buy-modal').classList.add('hidden'); }
+</script>
+</body>
+</html>

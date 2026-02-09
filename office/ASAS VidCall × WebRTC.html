@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASAS VidCall × WebRTC</title>
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <style>
+        :root { 
+            --bg: #202124; 
+            --card: #3c4043; 
+            --accent: #8ab4f8; 
+            --danger: #ea4335; 
+            --text-gray: #9aa0a6;
+        }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg); font-family: 'Roboto', Arial, sans-serif; color: white; overflow: hidden; }
+        
+        #lobby { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; gap: 20px; }
+        .preview-box { width: 450px; height: 253px; background: #000; border-radius: 12px; position: relative; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+        
+        #meeting-room { display: none; height: 100vh; flex-direction: row; }
+        
+        .main-view { flex: 1; display: flex; flex-direction: column; height: 100vh; position: relative; }
+
+        .video-container { 
+            flex: 1; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 20px; 
+            gap: 15px; 
+            flex-wrap: wrap; 
+            overflow-y: auto; 
+        }
+
+        .video-tile { 
+            flex: 1 1 300px; 
+            min-width: 280px; 
+            max-width: 45%; 
+            aspect-ratio: 16/9; 
+            background: #3c4043; 
+            border-radius: 12px; 
+            overflow: hidden; 
+            position: relative; 
+        }
+        
+        video { width: 100%; height: 100%; object-fit: cover; }
+        .user-label { position: absolute; bottom: 12px; left: 16px; background: rgba(0,0,0,0.5); padding: 4px 12px; border-radius: 4px; font-size: 14px; font-weight: 500; z-index: 10; }
+
+        .bottom-bar { height: 80px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; background: var(--bg); position: relative; }
+        .controls-center { display: flex; gap: 12px; position: absolute; left: 50%; transform: translateX(-50%); }
+        
+        .ctrl-btn { width: 48px; height: 48px; border-radius: 50%; border: none; background: var(--card); color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; position: relative; }
+        .ctrl-btn svg { fill: white; width: 24px; height: 24px; }
+        .ctrl-btn:hover { background: #4a4e52; }
+        
+        .ctrl-btn.off { background: var(--danger) !important; }
+        .ctrl-btn.off::after {
+            content: "";
+            position: absolute;
+            width: 2px;
+            height: 30px;
+            background: white;
+            transform: rotate(45deg);
+            z-index: 5;
+        }
+
+        .btn-hangup { background: var(--danger); width: 64px; border-radius: 24px; }
+        .meet-input { background: #3c4043; border: 1px solid #5f6368; color: white; padding: 12px 16px; border-radius: 4px; font-size: 16px; width: 200px; }
+        .primary-btn { background: var(--accent); color: #202124; border: none; padding: 12px 24px; border-radius: 24px; font-weight: 600; cursor: pointer; }
+
+        /* Chat Sidebar (Meet Style) */
+        #chat-sidebar { 
+            width: 320px; background: white; color: #202124; display: none; 
+            flex-direction: column; margin: 10px; border-radius: 8px; 
+        }
+        .chat-header { padding: 20px; font-weight: 500; font-size: 18px; border-bottom: 1px solid #ddd; color: #202124; }
+        #chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .msg-bubble { background: #f1f3f4; padding: 8px 12px; border-radius: 8px; max-width: 90%; align-self: flex-start; color: #202124; }
+        .msg-bubble b { display: block; font-size: 11px; color: #5f6368; margin-bottom: 2px; }
+        .chat-input-container { padding: 15px; border-top: 1px solid #ddd; display: flex; gap: 5px; }
+        .chat-field { flex: 1; border: 1px solid #ddd; border-radius: 20px; padding: 8px 15px; outline: none; }
+
+        /* Floating Notifications */
+        #notif-container { position: fixed; bottom: 100px; left: 24px; z-index: 1000; pointer-events: none; }
+        .floating-notif { 
+            background: rgba(32, 33, 36, 0.95); color: white; padding: 12px 20px; 
+            border-radius: 8px; margin-top: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            border-left: 4px solid var(--accent); animation: slideIn 0.3s ease-out;
+            max-width: 250px; font-size: 14px;
+        }
+        .notif-end { border-left-color: var(--danger); }
+        @keyframes slideIn { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* Modals */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; align-items: center; justify-content: center; }
+        .modal-card { background: var(--card); padding: 32px; border-radius: 16px; text-align: center; max-width: 380px; width: 90%; box-shadow: 0 8px 24px rgba(0,0,0,0.5); }
+        .modal-btns { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
+        .modal-btn { padding: 14px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .end-all { background: var(--danger); color: white; }
+        .end-self { background: white; color: black; }
+        
+        #final-screen { display: none; flex-direction: column; align-items: center; justify-content: center; height: 100vh; background: var(--bg); text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div id="notif-container"></div>
+
+    <div id="lobby">
+        <h1 style="font-weight: 400; margin-bottom: 5px;">ASAS VidCall × WebRTC</h1>
+        <div class="preview-box">
+            <video id="previewVideo" autoplay playsinline muted></video>
+        </div>
+        <div style="display:flex; flex-direction: column; gap: 10px; align-items: center;">
+            <input type="text" id="user-name" class="meet-input" placeholder="Your Name" style="width: 320px;">
+            <div style="display:flex; gap: 10px;">
+                <input type="text" id="my-id-input" class="meet-input" placeholder="Your ID Code">
+                <button class="primary-btn" onclick="startMeeting()">Join Now</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="meeting-room">
+        <div class="main-view">
+            <div class="video-container" id="video-grid">
+                <div class="video-tile">
+                    <video id="localVideo" autoplay playsinline muted></video>
+                    <div class="user-label" id="local-name-tag">You</div>
+                </div>
+            </div>
+
+            <div class="bottom-bar">
+                <div style="font-size: 14px;">Your ID: <b id="display-id">---</b></div>
+                
+                <div class="controls-center">
+                    <button class="ctrl-btn" id="mic-btn" onclick="toggleMic()">
+                        <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+                    </button>
+                    <button class="ctrl-btn" id="cam-btn" onclick="toggleCam()">
+                        <svg viewBox="0 0 24 24"><path d="M15 8v8H5V8h10m1-2H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1V7c0-.55-.45-1-1-1zm4 14l-4-4V8l4-4v16z"/></svg>
+                    </button>
+                    <button class="ctrl-btn" id="present-btn" onclick="shareScreen()">
+                        <svg viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 1.99-.9 1.99-2L23 5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/><path d="M10 12l3 3 5-5-1.41-1.41L13 12.17l-1.59-1.59L10 12z"/></svg>
+                    </button>
+                    <button class="ctrl-btn" id="chat-toggle" onclick="toggleChat()">
+                        <svg viewBox="0 0 24 24" fill="white"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/></svg>
+                    </button>
+                    <button class="ctrl-btn btn-hangup" onclick="showEndOptions()">
+                        <svg viewBox="0 0 24 24"><path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.11-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/></svg>
+                    </button>
+                </div>
+
+                <div style="display:flex; gap: 8px;">
+                    <input type="text" id="remote-id-input" class="meet-input" placeholder="Participant Code" style="width:120px;">
+                    <button class="primary-btn" onclick="makeCall()">Invite</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="chat-sidebar">
+            <div class="chat-header">In-call messages</div>
+            <div id="chat-messages"></div>
+            <div class="chat-input-container">
+                <input type="text" id="chat-input" class="chat-field" placeholder="Send a message">
+                <button class="primary-btn" onclick="sendChatMessage()" style="padding: 8px 15px;">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="end-modal">
+        <div class="modal-card">
+            <h3 style="margin:0; font-weight: 500;">Leave Meeting?</h3>
+            <div class="modal-btns">
+                <button class="modal-btn end-all" onclick="handleEndCall(true)">End for everyone</button>
+                <button class="modal-btn end-self" onclick="handleEndCall(false)">Leave meeting</button>
+                <button class="modal-btn" style="background:transparent; color:white;" onclick="closeModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="final-screen">
+        <h1 style="font-weight: 400; font-size: 32px; margin-bottom: 10px;">Your call has ended</h1>
+        <p style="color: var(--text-gray); margin-bottom: 30px;">Thank you for using ASAS VidCall</p>
+        <button class="primary-btn" onclick="window.close(); window.location.href='about:blank';">Close Tab</button>
+    </div>
+
+    <script>
+        let peer, localStream, currentUserName, screenStream;
+        let isMicOn = true, isCamOn = true;
+        const callList = new Set();
+        const activeCalls = []; 
+        const connections = [];
+        const nameMap = {};
+
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(stream => {
+            localStream = stream;
+            document.getElementById('previewVideo').srcObject = stream;
+        }).catch(err => alert("Camera blocked! Please allow access."));
+
+        function startMeeting() {
+            currentUserName = document.getElementById('user-name').value || "Guest";
+            const myId = document.getElementById('my-id-input').value;
+            if (!myId) return alert("Enter code!");
+
+            peer = new Peer(myId);
+            peer.on('open', (id) => {
+                document.getElementById('lobby').style.display = 'none';
+                document.getElementById('meeting-room').style.display = 'flex';
+                document.getElementById('display-id').innerText = id;
+                document.getElementById('local-name-tag').innerText = currentUserName;
+                document.getElementById('localVideo').srcObject = localStream;
+            });
+
+            peer.on('connection', (conn) => {
+                handleConnection(conn);
+            });
+
+            peer.on('call', call => {
+                call.answer(localStream);
+                activeCalls.push(call);
+                call.on('stream', rs => createVideoTile(call.peer, rs));
+            });
+        }
+
+        function handleConnection(conn) {
+            connections.push(conn);
+            conn.on('open', () => conn.send({ type: 'name-share', name: currentUserName }));
+            conn.on('data', (data) => {
+                if (data.type === 'name-share') {
+                    nameMap[conn.peer] = data.name;
+                    updateParticipantName(conn.peer, data.name);
+                }
+                if (data.type === 'chat') {
+                    receiveChatMessage(data.name, data.msg);
+                }
+                if (data.type === 'end-everyone') triggerFinalScreen();
+            });
+            conn.on('close', () => {
+                const name = nameMap[conn.peer] || "Participant";
+                showFloatingNotif(`${name} left the call`, true);
+                removeVideoTile(conn.peer);
+            });
+        }
+
+        function makeCall() {
+            const rId = document.getElementById('remote-id-input').value;
+            if (!rId || rId === peer.id) return;
+
+            const conn = peer.connect(rId);
+            handleConnection(conn);
+
+            const call = peer.call(rId, localStream);
+            activeCalls.push(call);
+            call.on('stream', rs => createVideoTile(rId, rs));
+        }
+
+        async function shareScreen() {
+            try {
+                screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                const screenTrack = screenStream.getVideoTracks()[0];
+                
+                // Change local display
+                document.getElementById('localVideo').srcObject = screenStream;
+                document.getElementById('present-btn').classList.add('off');
+
+                // REPLACE TRACK FOR ALL PEERS
+                activeCalls.forEach(call => {
+                    const videoSender = call.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
+                    if (videoSender) {
+                        videoSender.replaceTrack(screenTrack);
+                    }
+                });
+
+                screenTrack.onended = () => stopScreenShare();
+            } catch (e) { console.error("Screen share error:", e); }
+        }
+
+        function stopScreenShare() {
+            const videoTrack = localStream.getVideoTracks()[0];
+            document.getElementById('localVideo').srcObject = localStream;
+            document.getElementById('present-btn').classList.remove('off');
+
+            activeCalls.forEach(call => {
+                const videoSender = call.peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
+                if (videoSender) {
+                    videoSender.replaceTrack(videoTrack);
+                }
+            });
+
+            if (screenStream) {
+                screenStream.getTracks().forEach(t => t.stop());
+                screenStream = null;
+            }
+        }
+
+        function toggleChat() {
+            const sidebar = document.getElementById('chat-sidebar');
+            sidebar.style.display = sidebar.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            connections.forEach(conn => conn.send({ type: 'chat', name: currentUserName, msg: msg }));
+            receiveChatMessage("You", msg);
+            input.value = "";
+        }
+
+        function receiveChatMessage(sender, msg) {
+            const chatBox = document.getElementById('chat-messages');
+            const bubble = document.createElement('div');
+            bubble.className = 'msg-bubble';
+            bubble.innerHTML = `<b>${sender}</b>${msg}`;
+            chatBox.appendChild(bubble);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            if (sender !== "You") {
+                showFloatingNotif(`${sender}: ${msg}`);
+            }
+        }
+
+        function showFloatingNotif(text, isEnd = false) {
+            const container = document.getElementById('notif-container');
+            const notif = document.createElement('div');
+            notif.className = `floating-notif ${isEnd ? 'notif-end' : ''}`;
+            notif.innerText = text;
+            container.appendChild(notif);
+            setTimeout(() => {
+                notif.style.opacity = '0';
+                setTimeout(() => notif.remove(), 400);
+            }, 4000);
+        }
+
+        function createVideoTile(id, stream) {
+            if (callList.has(id)) return;
+            callList.add(id);
+            const container = document.getElementById('video-grid');
+            const tile = document.createElement('div');
+            tile.className = 'video-tile';
+            tile.id = `tile-${id}`;
+            const video = document.createElement('video');
+            video.srcObject = stream; video.autoplay = true; video.playsInline = true;
+            const label = document.createElement('div');
+            label.className = 'user-label'; label.id = `label-${id}`; 
+            label.innerText = nameMap[id] || "User";
+            tile.appendChild(video); tile.appendChild(label); container.appendChild(tile);
+        }
+
+        function removeVideoTile(id) {
+            const tile = document.getElementById(`tile-${id}`);
+            if (tile) tile.remove();
+            callList.delete(id);
+        }
+
+        function updateParticipantName(id, name) {
+            const label = document.getElementById(`label-${id}`);
+            if (label) label.innerText = name;
+        }
+
+        function toggleMic() {
+            isMicOn = !isMicOn;
+            localStream.getAudioTracks()[0].enabled = isMicOn;
+            document.getElementById('mic-btn').classList.toggle('off', !isMicOn);
+        }
+
+        function toggleCam() {
+            isCamOn = !isCamOn;
+            localStream.getVideoTracks()[0].enabled = isCamOn;
+            document.getElementById('cam-btn').classList.toggle('off', !isCamOn);
+        }
+
+        function showEndOptions() { document.getElementById('end-modal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('end-modal').style.display = 'none'; }
+
+        function handleEndCall(everyone) {
+            if (everyone) connections.forEach(conn => conn.send({ type: 'end-everyone' }));
+            triggerFinalScreen();
+        }
+
+        function triggerFinalScreen() {
+            if (localStream) localStream.getTracks().forEach(track => track.stop());
+            if (screenStream) screenStream.getTracks().forEach(track => track.stop());
+            document.getElementById('meeting-room').style.display = 'none';
+            document.getElementById('end-modal').style.display = 'none';
+            document.getElementById('final-screen').style.display = 'flex';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASAS Draw</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <style>
+        :root { --primary: #0078d4; --bg: #faf9f8; --panel: #ffffff; }
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif; }
+        
+        .canvas-container {
+            background-color: var(--bg);
+            background-image: radial-gradient(#d1d1d1 1.2px, transparent 1.2px);
+            background-size: 30px 30px;
+        }
+
+        #toolbar {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 10px; background: var(--panel); padding: 12px 24px;
+            border-radius: 100px; box-shadow: 0 10px 30px rgba(0,0,0,0.12); z-index: 1000;
+            border: 1px solid #edebe9; align-items: center;
+        }
+
+        button {
+            border: none; background: #f3f2f1; padding: 10px 16px;
+            border-radius: 12px; cursor: pointer; font-weight: 600; transition: 0.2s;
+            display: flex; align-items: center; gap: 5px;
+        }
+
+        button:hover { background: #e1dfdd; }
+        button.active { background: var(--primary); color: white; }
+        
+        .danger { color: #a4262c; }
+        .success { color: #107c10; }
+
+        input[type="color"] { width: 35px; height: 35px; border: none; cursor: pointer; background: none; }
+    </style>
+</head>
+<body>
+
+<div id="toolbar">
+    <button id="select-mode" class="active" onclick="setMode('select')">🖐️ Select</button>
+    <button id="draw-mode" onclick="setMode('draw')">✏️ Pen</button>
+    <button onclick="addSticky()">📝 Note</button>
+    <button onclick="addShape('rect')">⬜ Rectangle</button>
+    <button onclick="addShape('circle')">◯ Circle</button>
+    <input type="color" id="colorPicker" value="#0078d4" onchange="updateBrush()">
+    <div style="width: 1px; height: 25px; background: #ddd; margin: 0 5px;"></div>
+    <button class="danger" onclick="deleteSelected()">🗑️ Delete</button>
+    <button class="danger" onclick="clearCanvas()">🧹 Clear</button>
+    <button class="success" onclick="downloadCanvas()">💾 Save</button>
+</div>
+
+<canvas id="c"></canvas>
+
+<script>
+    const canvas = new fabric.Canvas('c', {
+        width: window.innerWidth,
+        height: window.innerHeight,
+        preserveObjectStacking: true // Important for keeping text on top
+    });
+
+    // Handle Window Resize
+    window.addEventListener('resize', () => {
+        canvas.setDimensions({ width: window.innerWidth, height: window.innerHeight });
+    });
+
+    function setMode(mode) {
+        canvas.isDrawingMode = (mode === 'draw');
+        document.getElementById('draw-mode').classList.toggle('active', canvas.isDrawingMode);
+        document.getElementById('select-mode').classList.toggle('active', !canvas.isDrawingMode);
+        if(canvas.isDrawingMode) updateBrush();
+    }
+
+    function updateBrush() {
+        canvas.freeDrawingBrush.color = document.getElementById('colorPicker').value;
+        canvas.freeDrawingBrush.width = 4;
+    }
+
+    function addShape(type) {
+        setMode('select');
+        const color = document.getElementById('colorPicker').value;
+        const base = { left: 200, top: 200, fill: color, width: 100, height: 100 };
+        const shape = (type === 'rect') ? new fabric.Rect({...base, rx: 10, ry: 10}) : new fabric.Circle({...base, radius: 50});
+        canvas.add(shape).setActiveObject(shape);
+    }
+
+    // --- ENHANCED STICKY NOTE LOGIC ---
+    function addSticky() {
+        setMode('select');
+        const posX = 150 + Math.random() * 50;
+        const posY = 150 + Math.random() * 50;
+
+        // 1. The Paper
+        const rect = new fabric.Rect({
+            width: 200, height: 200,
+            fill: '#fff4ce',
+            rx: 2, ry: 2,
+            shadow: 'rgba(0,0,0,0.15) 3px 3px 10px',
+            originX: 'center', originY: 'center'
+        });
+
+        // 2. The Text (IText is natively editable on click/double-click)
+        const text = new fabric.IText('Click to type', {
+            fontSize: 22,
+            fontFamily: 'Segoe UI',
+            textAlign: 'center',
+            originX: 'center',
+            originY: 'center',
+            width: 180,
+            splitByGrapheme: true,
+            editingBorderColor: '#0078d4'
+        });
+
+        // 3. Simple Group (Allows individual interaction via subTargetCheck)
+        const noteGroup = new fabric.Group([rect, text], {
+            left: posX,
+            top: posY,
+            subTargetCheck: true, // This allows the text inside to be clicked
+            interactive: true
+        });
+
+        canvas.add(noteGroup);
+        canvas.setActiveObject(noteGroup);
+        
+        // Auto-focus text on double click
+        noteGroup.on('mousedblclick', () => {
+            text.enterEditing();
+            text.selectAll();
+            canvas.renderAll();
+        });
+    }
+
+    function deleteSelected() {
+        canvas.getActiveObjects().forEach(obj => canvas.remove(obj));
+        canvas.discardActiveObject().requestRenderAll();
+    }
+
+    function clearCanvas() {
+        if(confirm("Clear the entire board?")) canvas.clear();
+    }
+
+    function downloadCanvas() {
+        const dataURL = canvas.toDataURL({ format: 'png', quality: 1 });
+        const link = document.createElement('a');
+        link.download = 'whiteboard.png';
+        link.href = dataURL;
+        link.click();
+    }
+
+    // Delete keys
+    document.addEventListener('keydown', (e) => {
+        if((e.key === "Delete" || e.key === "Backspace")) {
+            const active = canvas.getActiveObject();
+            if (active && !active.isEditing) {
+                deleteSelected();
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="images/screen.png">
+    <title>ASAS ScreenSaver - V1.0</title>
+    <style>
+        :root { 
+            --glass: rgba(0, 0, 0, 0.45);
+            --accent: #f1c40f; 
+            --font-main: 'Segoe UI', Roboto, -apple-system, sans-serif;
+        }
+        
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            overflow: hidden; background-color: #000; color: #fff;
+            font-family: var(--font-main);
+        }
+
+        /* --- THE LEGENDARY WORKING LOOP --- */
+        .loop-bg {
+            position: fixed; inset: 0; z-index: 1;
+            background-size: cover; background-position: center;
+            background-repeat: no-repeat;
+            animation: slideShow 15s infinite ease-in-out;
+        }
+        @keyframes slideShow {
+            0%, 33% { background-image: url('1.png'); }
+            34%, 66% { background-image: url('2.png'); }
+            67%, 100% { background-image: url('3.png'); }
+        }
+
+        /* Gradient Overlay for Readability */
+        .vignette {
+            position: fixed; inset: 0; z-index: 2;
+            background: radial-gradient(circle, transparent 20%, rgba(0,0,0,0.4) 100%);
+            pointer-events: none;
+        }
+
+        /* --- MODERN UI OBJECTS --- */
+        #dashboard { 
+            position: relative; z-index: 10;
+            display: none; height: 100vh; flex-direction: column; 
+            justify-content: space-between; padding: 60px; box-sizing: border-box;
+        }
+
+        .top-row { display: flex; justify-content: flex-end; }
+        
+        .music-card { 
+            background: var(--glass); backdrop-filter: blur(25px); 
+            padding: 12px 24px; border-radius: 100px; 
+            border: 1px solid rgba(255,255,255,0.15); 
+            display: flex; align-items: center; gap: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        .music-icon { font-size: 22px; animation: musicPulse 1.5s infinite; }
+
+        .bottom-row { display: flex; justify-content: space-between; align-items: flex-end; }
+        
+        #clock { 
+            font-size: 140px; font-weight: 800; line-height: 0.8; margin: 0; 
+            letter-spacing: -5px; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+        }
+        #date-weather { 
+            font-size: 22px; margin-top: 25px; font-weight: 300; 
+            letter-spacing: 2px; text-transform: uppercase; opacity: 0.8;
+        }
+        
+        .news-card { 
+            max-width: 480px; background: var(--glass); backdrop-filter: blur(30px); 
+            padding: 30px; border-radius: 24px; 
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .news-tag { 
+            font-size: 11px; color: var(--accent); font-weight: 800; 
+            margin-bottom: 12px; letter-spacing: 3px; text-transform: uppercase;
+        }
+        #news-headline { font-size: 20px; line-height: 1.6; font-weight: 400; transition: all 0.5s ease; }
+
+        /* Start Screen */
+        #overlay { position: fixed; inset: 0; background: #000; display: flex; justify-content: center; align-items: center; z-index: 100; }
+        .btn-modern { 
+            padding: 20px 50px; font-size: 18px; cursor: pointer; border-radius: 100px; 
+            border: 1px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: #fff;
+            backdrop-filter: blur(10px); font-weight: 600; transition: 0.4s; letter-spacing: 2px;
+        }
+        .btn-modern:hover { background: #fff; color: #000; transform: translateY(-5px); box-shadow: 0 15px 30px rgba(255,255,255,0.2); }
+
+        @keyframes musicPulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div id="overlay"><button class="btn-modern" onclick="start()">START SCREENSAVER</button></div>
+
+    <div class="loop-bg"></div>
+    <div class="vignette"></div>
+
+    <div id="dashboard">
+        <div class="top-row">
+            <div class="music-card">
+                <span class="music-icon">💿</span>
+                <div>
+                    <div style="font-size: 9px; opacity: 0.5; letter-spacing: 1px;">SOUNDTRACK</div>
+                    <div id="music-title" style="font-size: 15px; font-weight: 600;">---</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-row">
+            <div class="bottom-left">
+                <div id="clock">00:00</div>
+                <div id="date-weather">Fetching Data...</div>
+            </div>
+            
+            <div class="news-card">
+                <div class="news-tag">Trending News</div>
+                <div id="news-headline">Scanning headlines...</div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="player"></audio>
+
+    <script>
+        let track = 1;
+        let newsItems = [];
+        let newsIndex = 0;
+        const player = document.getElementById('player');
+
+        function updateClock() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('en-MY', { 
+                hour: '2-digit', minute: '2-digit', hour12: true 
+            }).toUpperCase();
+            document.getElementById('clock').innerText = timeStr;
+        }
+
+        async function fetchSystemData() {
+            try {
+                // Weather
+                const wRes = await fetch('https://wttr.in/Malaysia?format=%c+%t');
+                const wData = await wRes.text();
+                const now = new Date();
+                const dStr = now.toLocaleDateString('en-MY', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
+                document.getElementById('date-weather').innerHTML = `${dStr} &nbsp; // &nbsp; ${wData}`;
+
+                // News
+                const nRes = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=https://news.google.com/rss?hl=en-MY&gl=MY&ceid=MY:en`);
+                const nData = await nRes.json();
+                newsItems = nData.items;
+                rotateNews();
+            } catch (e) { console.warn("Data sync failed"); }
+        }
+
+        function rotateNews() {
+            if (newsItems.length > 0) {
+                const el = document.getElementById('news-headline');
+                el.style.opacity = 0;
+                el.style.transform = "translateY(10px)";
+                setTimeout(() => {
+                    el.innerText = newsItems[newsIndex].title;
+                    el.style.opacity = 1;
+                    el.style.transform = "translateY(0)";
+                    newsIndex = (newsIndex + 1) % newsItems.length;
+                }, 500);
+            }
+        }
+
+        function playNext() {
+            player.src = `${track}.mp3`;
+            document.getElementById('music-title').innerText = `Track ${track}`;
+            player.play().catch(() => { track = 1; playNext(); });
+            track++;
+        }
+
+        function start() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'flex';
+            if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen();
+
+            updateClock();
+            setInterval(updateClock, 1000);
+
+            fetchSystemData();
+            setInterval(fetchSystemData, 600000); 
+            setInterval(rotateNews, 5000); // 5-second trend swap
+
+            playNext();
+            player.onended = playNext;
+        }
+    </script>
+</body>
+</html>

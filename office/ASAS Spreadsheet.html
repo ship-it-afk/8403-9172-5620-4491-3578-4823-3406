@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="images/sheet.png">
+    <title>ASAS Spreadsheet v1.0</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --primary: #217346;
+            --ribbon-bg: #f3f2f1;
+            --border: #d1d1d1;
+            --grid-border: #e1e1e1;
+            --text: #333;
+            --page-bg: #f3f2f1;
+            --menu-bg: #ffffff;
+            --menu-hover: #edebe9;
+            --selection: rgba(33, 115, 70, 0.1);
+        }
+
+        body.dark-mode {
+            --ribbon-bg: #2d2d2d;
+            --border: #444;
+            --grid-border: #333;
+            --text: #e0e0e0;
+            --page-bg: #121212;
+            --menu-bg: #333;
+            --menu-hover: #444;
+            background: #1e1e1e;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; color: var(--text); }
+
+        .tab-bar { background: var(--primary); display: flex; padding: 0 10px; gap: 2px; height: 45px; align-items: flex-end; }
+        .main-file-btn { background: #107c10; color: white; padding: 10px 20px; font-weight: bold; cursor: pointer; border-radius: 4px 4px 0 0; margin-right: 10px; font-size: 13px; border:none; }
+        .tab { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.9); padding: 8px 18px; border-radius: 5px 5px 0 0; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 10px; border: 1px solid transparent; border-bottom: none; max-width: 160px; position: relative; }
+        .tab.active { background: var(--ribbon-bg); color: var(--text); font-weight: bold; border-color: var(--border); }
+        .header-tools { margin-left: auto; display: flex; align-items: center; height: 100%; padding-bottom: 5px; gap: 8px; }
+
+        .ribbon { background: var(--ribbon-bg); border-bottom: 1px solid var(--border); padding: 5px; }
+        .ribbon-tabs { display: flex; gap: 15px; padding: 0 10px; margin-bottom: 5px; }
+        .ribbon-tab-link { font-size: 12px; cursor: pointer; padding: 2px 8px; color: var(--text); opacity: 0.7; text-transform: uppercase; border-bottom: 2px solid transparent; }
+        .ribbon-tab-link.active { opacity: 1; font-weight: bold; border-bottom: 2px solid var(--primary); }
+        .ribbon-group { display: none; padding: 5px 10px; gap: 12px; align-items: center; height: 65px; overflow-x: auto; }
+        .ribbon-group.active { display: flex; }
+        .ribbon-tool-btn { border: 1px solid transparent; background: transparent; padding: 4px; border-radius: 3px; cursor: pointer; display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--text); min-width: 45px; }
+        .ribbon-tool-btn:hover { background: rgba(0,0,0,0.05); border: 1px solid var(--border); }
+        .v-sep { width: 1px; height: 40px; background: var(--border); margin: 0 5px; }
+
+        .formula-bar { display: flex; align-items: center; background: white; border-bottom: 1px solid var(--border); padding: 4px 10px; gap: 10px; }
+        #cell-address { width: 60px; border: 1px solid var(--border); padding: 2px 5px; font-weight: bold; text-align: center; font-size: 13px; background: #f9f9f9; }
+        #formula-input { flex: 1; border: 1px solid var(--border); padding: 2px 8px; font-size: 13px; outline: none; }
+
+        .workspace { flex: 1; overflow: auto; background: var(--page-bg); position: relative; }
+        table.sheet-grid { border-collapse: collapse; background: white; table-layout: fixed; width: max-content; }
+        th { background: #f3f2f1; border: 1px solid var(--border); font-size: 11px; font-weight: normal; color: #666; height: 25px; position: sticky; top: 0; z-index: 2; overflow: hidden; }
+        .resizer { position: absolute; right: 0; top: 0; height: 100%; width: 5px; cursor: col-resize; z-index: 3; }
+        .row-label { width: 40px; background: #f3f2f1; text-align: center; position: sticky; left: 0; z-index: 2; border: 1px solid var(--border); }
+        td { border: 1px solid var(--grid-border); width: 100px; height: 22px; padding: 0 4px; outline: none; font-size: 13px; overflow: hidden; white-space: nowrap; }
+        td.selected { border: 2px solid var(--primary); background: var(--selection); }
+
+        #contextMenu { position: fixed; display: none; background: var(--menu-bg); border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 10000; min-width: 200px; padding: 5px 0; border-radius: 4px; }
+        .menu-item { padding: 8px 15px; font-size: 13px; cursor: pointer; display: flex; justify-content: space-between; color: var(--text); }
+        .menu-item:hover { background: var(--menu-hover); }
+    </style>
+</head>
+<body onclick="hideMenu()">
+
+<div class="tab-bar">
+    <button class="main-file-btn" onclick="saveAsASXL()">SAVE</button>
+    <div id="tabBar" style="display:flex; gap:2px; align-items:flex-end;"></div>
+    <div class="header-tools">
+        <input type="file" id="asxl-input" accept=".asxl" style="display: none;" onchange="handleFileSelect(event)">
+        <button onclick="document.getElementById('asxl-input').click()" style="background:rgba(255,255,255,0.2); border:none; color:white; cursor:pointer; padding:5px 10px; border-radius:3px; font-size:11px;">📂 OPEN</button>
+        <button onclick="toggleDarkMode()" style="background:rgba(255,255,255,0.2); border:none; color:white; cursor:pointer; padding:5px 10px; border-radius:3px; font-size:11px;">🌓 THEME</button>
+    </div>
+</div>
+
+<div class="ribbon">
+    <div class="ribbon-tabs">
+        <span class="ribbon-tab-link active" onclick="switchRibbonTab(this, 'home')">Home</span>
+        <span class="ribbon-tab-link" onclick="switchRibbonTab(this, 'insert')">Insert</span>
+        <span class="ribbon-tab-link" onclick="switchRibbonTab(this, 'formulas')">Formulas</span>
+    </div>
+
+    <div id="ribbon-home" class="ribbon-group active">
+        <select id="fontPicker" onchange="applyStyle('fontFamily', this.value)">
+            <option value="Segoe UI">Segoe UI</option>
+            <option value="Arial">Arial</option>
+            <option value="Consolas">Consolas</option>
+        </select>
+        <div class="v-sep"></div>
+        <button class="ribbon-tool-btn" onclick="applyStyle('fontWeight', 'bold')"><b>B</b>Bold</button>
+        <button class="ribbon-tool-btn" onclick="applyStyle('fontStyle', 'italic')"><i>I</i>Italic</button>
+    </div>
+
+    <div id="ribbon-insert" class="ribbon-group">
+        <button class="ribbon-tool-btn" onclick="addNewTab()">➕ New Sheet</button>
+        <button class="ribbon-tool-btn" onclick="exportToPDF()">📄 Export PDF</button>
+        <button class="ribbon-tool-btn" onclick="exportToCSV()">📄 Export CSV</button>
+    </div>
+
+    <div id="ribbon-formulas" class="ribbon-group">
+        <button class="ribbon-tool-btn" onclick="insertFormulaText('=SUM(A1:A5)')">Σ Sum</button>
+    </div>
+</div>
+
+<div class="formula-bar">
+    <input type="text" id="cell-address" readonly value="A1">
+    <div style="color:#ccc; font-style:italic">fx</div>
+    <input type="text" id="formula-input" placeholder="Enter text or formula..." oninput="syncCell(this.value)" onblur="refreshAllFormulas()">
+</div>
+
+<div class="workspace" id="sheet-container"></div>
+
+<div id="contextMenu">
+    <div class="menu-item" onclick="clearCell()">Clear Contents</div>
+</div>
+
+<script>
+    let tabs = [{ title: "Sheet1", data: {}, colWidths: {} }];
+    let activeTabIndex = 0;
+    let selectedCell = null;
+    const ROWS = 50;
+    const COLS = 26;
+
+    function switchRibbonTab(element, tabId) {
+        document.querySelectorAll('.ribbon-tab-link').forEach(link => link.classList.remove('active'));
+        element.classList.add('active');
+        document.querySelectorAll('.ribbon-group').forEach(group => group.classList.remove('active'));
+        document.getElementById('ribbon-' + tabId).classList.add('active');
+    }
+
+    function initGrid() {
+        let colGroup = '<colgroup><col style="width: 40px;">';
+        for (let i = 0; i < COLS; i++) {
+            let width = (tabs[activeTabIndex].colWidths && tabs[activeTabIndex].colWidths[i]) ? tabs[activeTabIndex].colWidths[i] : 100;
+            colGroup += `<col style="width: ${width}px;">`;
+        }
+        colGroup += '</colgroup>';
+
+        let html = `<table class="sheet-grid" id="main-grid">${colGroup}<tr><th></th>`;
+        for (let i = 0; i < COLS; i++) {
+            html += `<th style="position:relative;">${String.fromCharCode(65 + i)}<div class="resizer" onmousedown="startResize(event, ${i})"></div></th>`;
+        }
+        html += `</tr>`;
+
+        for (let r = 1; r <= ROWS; r++) {
+            html += `<tr><td class="row-label">${r}</td>`;
+            for (let c = 0; c < COLS; c++) {
+                const id = `${String.fromCharCode(65 + c)}${r}`;
+                html += `<td contenteditable="true" id="${id}" onfocus="selectCell(this)" onblur="refreshAllFormulas()" oninput="updateFormulaBar(this)" oncontextmenu="showMenu(event, this)"></td>`;
+            }
+            html += `</tr>`;
+        }
+        html += `</table>`;
+        document.getElementById('sheet-container').innerHTML = html;
+        loadTabData();
+    }
+
+    /* --- SAVE & EXPORT LOGIC --- */
+    function saveAsASXL() {
+        saveTabData(); // Sync current UI to data object
+        const jsonData = JSON.stringify(tabs);
+        const blob = new Blob([jsonData], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "workbook.asxl";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function exportToCSV() {
+        saveTabData();
+        let csv = "";
+        const grid = document.getElementById('main-grid');
+        const rows = grid.querySelectorAll('tr');
+        
+        rows.forEach((row, rowIndex) => {
+            if (rowIndex === 0) return; // Skip header row
+            let rowData = [];
+            const cells = row.querySelectorAll('td:not(.row-label)');
+            cells.forEach(cell => {
+                let val = cell.innerText.replace(/"/g, '""');
+                rowData.push('"' + val + '"');
+            });
+            csv += rowData.join(",") + "\r\n";
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = tabs[activeTabIndex].title + ".csv";
+        link.click();
+    }
+
+    function exportToPDF() {
+        const element = document.getElementById('main-grid');
+        const opt = {
+            margin: 0.5,
+            filename: tabs[activeTabIndex].title + '.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' }
+        };
+        html2pdf().set(opt).from(element).save();
+    }
+
+    /* --- DATA MANAGEMENT --- */
+    function saveTabData() {
+        const cells = document.querySelectorAll('#main-grid td[contenteditable="true"]');
+        let data = {};
+        cells.forEach(c => {
+            let formula = c.getAttribute('data-formula');
+            if (formula || c.innerText || c.style.cssText) {
+                data[c.id] = { text: c.innerText, formula: formula, style: c.style.cssText };
+            }
+        });
+        if (tabs[activeTabIndex]) tabs[activeTabIndex].data = data;
+    }
+
+    function loadTabData() {
+        const data = tabs[activeTabIndex].data;
+        for (let id in data) {
+            const cell = document.getElementById(id);
+            if (cell) {
+                cell.innerText = data[id].text;
+                if(data[id].formula) cell.setAttribute('data-formula', data[id].formula);
+                cell.style.cssText = data[id].style;
+            }
+        }
+        refreshAllFormulas();
+    }
+
+    /* --- FORMULA ENGINE --- */
+    function evaluateFormula(input) {
+        if (!input.startsWith('=')) return input;
+        let formula = input.substring(1).toUpperCase();
+        if (formula.startsWith('SUM(')) {
+            let range = formula.match(/\(([^)]+)\)/)[1];
+            return calculateRange(range);
+        }
+        let evalStr = formula.replace(/[A-Z][0-9]+/g, (match) => {
+            let cell = document.getElementById(match);
+            let val = cell ? cell.getAttribute('data-val') || cell.innerText : 0;
+            return isNaN(val) || val === "" ? 0 : val;
+        });
+        try { return eval(evalStr); } catch (e) { return "#ERROR!"; }
+    }
+
+    function calculateRange(range) {
+        let parts = range.split(':');
+        if(parts.length < 2) return 0;
+        let start = parts[0], end = parts[1];
+        let startCol = start.charCodeAt(0)-65, startRow = parseInt(start.substring(1));
+        let endCol = end.charCodeAt(0)-65, endRow = parseInt(end.substring(1));
+        let total = 0;
+        for(let r=startRow; r<=endRow; r++){
+            for(let c=startCol; c<=endCol; c++){
+                let cell = document.getElementById(String.fromCharCode(65+c)+r);
+                total += parseFloat(cell ? cell.getAttribute('data-val') || cell.innerText : 0) || 0;
+            }
+        }
+        return total;
+    }
+
+    function refreshAllFormulas() {
+        saveTabData();
+        document.querySelectorAll('#main-grid td[contenteditable="true"]').forEach(cell => {
+            let raw = cell.getAttribute('data-formula');
+            if (raw && raw.startsWith('=')) {
+                cell.innerText = evaluateFormula(raw);
+                cell.setAttribute('data-val', cell.innerText);
+            } else {
+                cell.setAttribute('data-val', cell.innerText);
+            }
+        });
+    }
+
+    /* --- UI HELPERS --- */
+    function selectCell(cell) {
+        if (selectedCell) selectedCell.classList.remove('selected');
+        selectedCell = cell;
+        cell.classList.add('selected');
+        document.getElementById('cell-address').value = cell.id;
+        document.getElementById('formula-input').value = cell.getAttribute('data-formula') || cell.innerText;
+    }
+
+    function syncCell(val) {
+        if (selectedCell) {
+            selectedCell.setAttribute('data-formula', val);
+            if (!val.startsWith('=')) selectedCell.innerText = val;
+            saveTabData();
+        }
+    }
+
+    function updateFormulaBar(cell) {
+        let val = cell.innerText;
+        if (!val.startsWith('=')) cell.setAttribute('data-formula', val);
+        document.getElementById('formula-input').value = cell.getAttribute('data-formula') || val;
+        saveTabData();
+    }
+
+    function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            tabs = JSON.parse(e.target.result);
+            activeTabIndex = 0;
+            initGrid();
+            renderTabs();
+        };
+        reader.readAsText(file);
+    }
+
+    function renderTabs() {
+        const bar = document.getElementById('tabBar');
+        bar.innerHTML = tabs.map((t, i) => `
+            <div class="tab ${i === activeTabIndex ? 'active' : ''}" onclick="switchTab(${i})">
+                📊 ${t.title} <span onclick="closeTab(${i}, event)" style="margin-left:8px; font-weight:bold;">×</span>
+            </div>
+        `).join('') + `<button onclick="addNewTab()" style="background:none; border:none; color:white; cursor:pointer; font-size:20px;">+</button>`;
+    }
+
+    function switchTab(i) {
+        saveTabData();
+        activeTabIndex = i;
+        initGrid();
+        renderTabs();
+    }
+
+    function addNewTab() {
+        tabs.push({ title: "Sheet" + (tabs.length + 1), data: {}, colWidths: {} });
+        switchTab(tabs.length - 1);
+    }
+
+    function closeTab(i, e) {
+        e.stopPropagation();
+        if (tabs.length > 1) {
+            tabs.splice(i, 1);
+            activeTabIndex = Math.min(activeTabIndex, tabs.length - 1);
+            switchTab(activeTabIndex);
+        }
+    }
+
+    /* --- RESIZE LOGIC --- */
+    let startX, startWidth, resizerIdx;
+    function startResize(e, idx) {
+        startX = e.pageX; resizerIdx = idx;
+        const col = document.querySelector(`#main-grid colgroup col:nth-child(${idx + 2})`);
+        startWidth = parseInt(window.getComputedStyle(col).width);
+        document.addEventListener('mousemove', doResize);
+        document.addEventListener('mouseup', stopResize);
+        e.preventDefault();
+    }
+    function doResize(e) {
+        const diff = e.pageX - startX;
+        const col = document.querySelector(`#main-grid colgroup col:nth-child(${resizerIdx + 2})`);
+        col.style.width = Math.max(30, startWidth + diff) + 'px';
+    }
+    function stopResize() {
+        const col = document.querySelector(`#main-grid colgroup col:nth-child(${resizerIdx + 2})`);
+        if (!tabs[activeTabIndex].colWidths) tabs[activeTabIndex].colWidths = {};
+        tabs[activeTabIndex].colWidths[resizerIdx] = parseInt(col.style.width);
+        document.removeEventListener('mousemove', doResize);
+        document.removeEventListener('mouseup', stopResize);
+    }
+
+    function applyStyle(prop, val) {
+        if (!selectedCell) return;
+        selectedCell.style[prop] = (prop === 'fontWeight' && selectedCell.style.fontWeight === 'bold') ? 'normal' : val;
+        saveTabData();
+    }
+
+    function insertFormulaText(text) {
+        if(selectedCell) {
+            document.getElementById('formula-input').value = text;
+            syncCell(text);
+            refreshAllFormulas();
+        }
+    }
+
+    function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
+    function showMenu(e, cell) { e.preventDefault(); selectCell(cell); document.getElementById('contextMenu').style.display='block'; document.getElementById('contextMenu').style.left=e.clientX+'px'; document.getElementById('contextMenu').style.top=e.clientY+'px'; }
+    function hideMenu() { document.getElementById('contextMenu').style.display='none'; }
+    function clearCell() { if(selectedCell) { selectedCell.innerText=""; selectedCell.removeAttribute('data-formula'); saveTabData(); } }
+
+    window.onload = () => { initGrid(); renderTabs(); };
+</script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI DocuSum</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --accent: #38bdf8;
+            --text: #f8fafc;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at top left, #1e293b, #0f172a);
+            color: var(--text);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 40px;
+            width: 100%;
+            max-width: 700px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 { font-weight: 800; letter-spacing: -1px; margin-bottom: 8px; font-size: 2rem; }
+        p { color: #94a3b8; margin-bottom: 30px; font-size: 0.95rem; }
+
+        #drop-zone {
+            border: 2px dashed rgba(56, 189, 248, 0.3);
+            border-radius: 16px;
+            padding: 50px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(56, 189, 248, 0.02);
+        }
+
+        #drop-zone:hover {
+            border-color: var(--accent);
+            background: rgba(56, 189, 248, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .status-pill {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--accent);
+            display: none;
+        }
+
+        #output {
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            font-size: 1rem;
+            line-height: 1.7;
+            color: #cbd5e1;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="glass-card">
+    <h1>Free AI Document Summarizer</h1>
+    <p>Upload PDF, DOCX, or XLSX for instant 2026 intelligence.</p>
+    
+    <div id="drop-zone">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent); margin-bottom: 15px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <br>Drop file here or click to browse
+    </div>
+    
+    <input type="file" id="file-input" hidden accept=".pdf,.docx,.xlsx">
+    
+    <div id="status-pill" class="status-pill">Ready</div>
+
+    <div id="output">Summary will appear here...</div>
+</div>
+
+<script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const output = document.getElementById('output');
+    const statusPill = document.getElementById('status-pill');
+
+    dropZone.onclick = () => fileInput.click();
+    fileInput.onchange = (e) => handleFile(e.target.files[0]);
+
+    async function handleFile(file) {
+        if (!file) return;
+        updateStatus("Reading Content...", true);
+        let text = "";
+
+        try {
+            if (file.name.endsWith('.pdf')) text = await extractPDF(file);
+            else if (file.name.endsWith('.docx')) text = await extractDOCX(file);
+            else if (file.name.endsWith('.xlsx')) text = await extractXLSX(file);
+            
+            await processLongText(text);
+        } catch (err) {
+            updateStatus("Error Occurred", true);
+            output.innerText = "Error: " + err.message;
+        }
+    }
+
+    async function processLongText(text) {
+        const MAX_CHARS = 6000; 
+        if (text.length <= MAX_CHARS) {
+            updateStatus("AI Analysis...", true);
+            output.innerText = await callPollinations(text);
+        } else {
+            const chunks = [];
+            for (let i = 0; i < text.length; i += MAX_CHARS) {
+                chunks.push(text.substring(i, i + MAX_CHARS));
+            }
+            
+            let summaries = [];
+            for (let i = 0; i < chunks.length; i++) {
+                updateStatus(`Analyzing Part ${i+1}/${chunks.length}...`, true);
+                summaries.push(await callPollinations(chunks[i], "Summarize this part:"));
+            }
+            updateStatus("Finalizing...", true);
+            output.innerText = await callPollinations(summaries.join("\n"), "Merge into a final executive summary:");
+        }
+        updateStatus("Analysis Complete", true);
+    }
+
+    async function callPollinations(content, prompt = "Summarize the following document accurately:") {
+        const response = await fetch('https://text.pollinations.ai/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                messages: [
+                    { role: 'system', content: 'You are a precise document AI. Provide structured bullet points.' },
+                    { role: 'user', content: `${prompt}\n\n${content}` }
+                ],
+                model: 'openai'
+            })
+        });
+        return await response.text();
+    }
+
+    function updateStatus(msg, show) {
+        statusPill.innerText = msg;
+        statusPill.style.display = show ? 'inline-block' : 'none';
+    }
+
+    // --- Format Parsers ---
+    async function extractPDF(file) {
+        const arrayBuffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+        let text = "";
+        for (let i = 1; i <= pdf.numPages; i++) {
+            const page = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            text += content.items.map(s => s.str).join(" ") + " ";
+        }
+        return text;
+    }
+
+    async function extractDOCX(file) {
+        const arrayBuffer = await file.arrayBuffer();
+        const res = await mammoth.extractRawText({arrayBuffer});
+        return res.value;
+    }
+
+    async function extractXLSX(file) {
+        const arrayBuffer = await file.arrayBuffer();
+        const wb = XLSX.read(arrayBuffer);
+        return wb.SheetNames.map(n => XLSX.utils.sheet_to_txt(wb.Sheets[n])).join("\n");
+    }
+</script>
+
+</body>
+</html>

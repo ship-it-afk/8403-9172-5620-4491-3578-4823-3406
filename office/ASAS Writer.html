@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="images/writer.png">
+    <title>ASAS Writer v1.0</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --primary: #2b579a;
+            --ribbon-bg: #f3f2f1;
+            --border: #d1d1d1;
+            --text: #333;
+            --page-bg: #e6e6e6;
+            --menu-bg: #ffffff;
+            --menu-hover: #edebe9;
+        }
+
+        body.dark-mode {
+            --ribbon-bg: #2d2d2d;
+            --border: #444;
+            --text: #e0e0e0;
+            --page-bg: #121212;
+            --menu-bg: #333;
+            --menu-hover: #444;
+            background: #1e1e1e;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; color: var(--text); }
+
+        /* HEADER & TABS */
+        .tab-bar { background: var(--primary); display: flex; padding: 0 10px; gap: 2px; height: 45px; align-items: flex-end; }
+        .main-file-btn { background: #107c10; color: white; padding: 10px 20px; font-weight: bold; cursor: pointer; border-radius: 4px 4px 0 0; margin-right: 10px; font-size: 13px; border:none; }
+        .tab { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.9); padding: 8px 18px; border-radius: 5px 5px 0 0; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 10px; border: 1px solid transparent; border-bottom: none; max-width: 160px; }
+        .tab.active { background: var(--ribbon-bg); color: var(--text); font-weight: bold; border-color: var(--border); }
+        .header-tools { margin-left: auto; display: flex; align-items: center; height: 100%; padding-bottom: 5px; gap: 8px; }
+
+        /* RIBBON SYSTEM */
+        .ribbon { background: var(--ribbon-bg); border-bottom: 1px solid var(--border); padding: 5px; }
+        .ribbon-tabs { display: flex; gap: 15px; padding: 0 10px; margin-bottom: 5px; }
+        .ribbon-tab-link { font-size: 12px; cursor: pointer; padding: 2px 8px; color: var(--text); opacity: 0.7; text-transform: uppercase; }
+        .ribbon-tab-link.active { opacity: 1; font-weight: bold; border-bottom: 2px solid var(--primary); }
+        
+        .ribbon-group { display: none; padding: 5px 10px; gap: 12px; align-items: center; height: 65px; overflow-x: auto; }
+        .ribbon-group.active { display: flex; }
+        .ribbon-tool-btn { border: 1px solid transparent; background: transparent; padding: 4px; border-radius: 3px; cursor: pointer; display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--text); min-width: 45px; }
+        .ribbon-tool-btn:hover { background: rgba(0,0,0,0.05); border: 1px solid var(--border); }
+        .ribbon-tool-btn.active-lock { background: #ffd7d7; color: #a30000; border: 1px solid #a30000; }
+        
+        .v-sep { width: 1px; height: 40px; background: var(--border); margin: 0 5px; }
+        select, input[type="number"] { padding: 2px; font-size: 12px; border: 1px solid var(--border); border-radius: 3px; }
+
+        /* WORKSPACE */
+        .workspace { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--page-bg); position: relative; }
+        .search-bar { background: var(--ribbon-bg); padding: 8px 20px; border-bottom: 1px solid var(--border); display: none; gap: 10px; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 5; }
+        
+        .editor-frame { flex: 1; overflow-y: auto; padding: 40px 20px; scroll-behavior: smooth; position: relative; }
+        .page { 
+            width: 210mm; min-height: 297mm; margin: 0 auto; background: white; 
+            box-shadow: 0 0 15px rgba(0,0,0,0.2); padding: 25mm; outline: none; 
+            color: #333; box-sizing: border-box; position: relative;
+            transform-origin: top center; transition: transform 0.2s, opacity 0.3s;
+        }
+        .page.locked { opacity: 0.6; cursor: not-allowed !important; pointer-events: none; }
+        .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-45deg); font-size: 80px; color: rgba(0,0,0,0.05); pointer-events: none; user-select: none; display: none; z-index: 0; white-space: nowrap; }
+
+        /* RESIZER STYLES */
+        #resizer-ui {
+            position: absolute;
+            border: 2px solid var(--primary);
+            pointer-events: none;
+            display: none;
+            z-index: 9999;
+        }
+        .handle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: white;
+            border: 1px solid var(--primary);
+            pointer-events: auto;
+            box-sizing: border-box;
+        }
+        /* Corners */
+        .h-nw { top: -6px; left: -6px; cursor: nw-resize; }
+        .h-ne { top: -6px; right: -6px; cursor: ne-resize; }
+        .h-sw { bottom: -6px; left: -6px; cursor: sw-resize; }
+        .h-se { bottom: -6px; right: -6px; cursor: se-resize; }
+        /* Sides */
+        .h-n { top: -6px; left: calc(50% - 5px); cursor: n-resize; }
+        .h-s { bottom: -6px; left: calc(50% - 5px); cursor: s-resize; }
+        .h-e { top: calc(50% - 5px); right: -6px; cursor: e-resize; }
+        .h-w { top: calc(50% - 5px); left: -6px; cursor: w-resize; }
+
+        /* CONTEXT MENU */
+        #contextMenu { position: fixed; display: none; background: var(--menu-bg); border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 10000; min-width: 200px; padding: 5px 0; border-radius: 4px; }
+        .menu-item { padding: 8px 15px; font-size: 13px; cursor: pointer; display: flex; justify-content: space-between; color: var(--text); }
+        .menu-item:hover { background: var(--menu-hover); }
+
+        .status-bar { background: var(--primary); color: white; font-size: 11px; padding: 4px 15px; display: flex; justify-content: space-between; align-items: center; }
+        .zoom-controls { display: flex; align-items: center; gap: 10px; }
+    </style>
+</head>
+<body onclick="hideMenu(); checkDeselect(event);">
+
+<div class="tab-bar">
+    <button class="main-file-btn" onclick="saveAsASWR()">SAVE</button>
+    <div id="tabBar" style="display:flex; gap:2px; align-items:flex-end;"></div>
+    <div class="header-tools">
+        <label style="background:#107c10; color:white; padding:5px 10px; border-radius:3px; font-size:11px; cursor:pointer; font-weight:bold;">
+            ➕ ADD TTF FONT <input type="file" id="fontUpload" accept=".ttf,.otf" hidden onchange="handleFontUpload(event)">
+        </label>
+        <button onclick="loadASWR()" style="background:rgba(255,255,255,0.2); border:none; color:white; cursor:pointer; padding:5px 10px; border-radius:3px; font-size:11px;">📂 OPEN</button>
+        <button onclick="toggleDarkMode()" style="background:rgba(255,255,255,0.2); border:none; color:white; cursor:pointer; padding:5px 10px; border-radius:3px; font-size:11px;">🌓 THEME</button>
+    </div>
+</div>
+
+<div class="ribbon">
+    <div class="ribbon-tabs">
+        <span class="ribbon-tab-link active" onclick="showRibbon('home')">Home</span>
+        <span class="ribbon-tab-link" onclick="showRibbon('insert')">Insert</span>
+        <span class="ribbon-tab-link" onclick="showRibbon('layout')">Layout</span>
+        <span class="ribbon-tab-link" onclick="showRibbon('review')">Review</span>
+    </div>
+
+    <div id="ribbon-home" class="ribbon-group active">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+            <select class="font-select" id="fontPicker" onchange="smartExec('fontFamily', this.value)">
+                <option value="Segoe UI">Segoe UI</option>
+                <option value="Arial">Arial</option>
+                <option value="Times New Roman">Times New Roman</option>
+                <option value="Courier New">Courier New</option>
+                <option value="Georgia">Georgia</option>
+                <option value="Impact">Impact</option>
+                <option value="Verdana">Verdana</option>
+            </select>
+            <select id="fontSizePicker" onchange="smartExec('fontSize', this.value)">
+                <option value="12pt">12pt</option>
+                <option value="8pt">8pt</option>
+                <option value="10pt">10pt</option>
+                <option value="14pt">14pt</option>
+                <option value="18pt">18pt</option>
+                <option value="24pt">24pt</option>
+                <option value="36pt">36pt</option>
+                <option value="48pt">48pt</option>
+            </select>
+        </div>
+        <div class="v-sep"></div>
+        <div style="display:flex; gap:2px;">
+            <button class="ribbon-tool-btn" onclick="exec('bold')"><b>B</b>Bold</button>
+            <button class="ribbon-tool-btn" onclick="exec('italic')"><i>I</i>Italic</button>
+            <button class="ribbon-tool-btn" onclick="exec('underline')"><u>U</u>Under</button>
+            <button class="ribbon-tool-btn" onclick="exec('strikeThrough')"><s>S</s>Strike</button>
+        </div>
+        <div class="v-sep"></div>
+        <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
+            <input type="color" oninput="exec('foreColor', this.value)" title="Font Color">
+            <span style="font-size:9px">Color</span>
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
+            <input type="color" value="#ffff00" oninput="exec('hiliteColor', this.value)" title="Highlight">
+            <span style="font-size:9px">High</span>
+        </div>
+        <div class="v-sep"></div>
+        <div style="display:flex; gap:2px;">
+            <button class="ribbon-tool-btn" onclick="exec('justifyLeft')">L</button>
+            <button class="ribbon-tool-btn" onclick="exec('justifyCenter')">C</button>
+            <button class="ribbon-tool-btn" onclick="exec('justifyRight')">R</button>
+            <button class="ribbon-tool-btn" onclick="exec('justifyFull')">J</button>
+        </div>
+    </div>
+
+    <div id="ribbon-insert" class="ribbon-group">
+        <button class="ribbon-tool-btn" onclick="insertImage()">🖼️ Image</button>
+        <button class="ribbon-tool-btn" onclick="insertTable()">▦ Table</button>
+        <button class="ribbon-tool-btn" onclick="exec('insertHorizontalRule')">— Line</button>
+        <button class="ribbon-tool-btn" onclick="exec('insertOrderedList')">1. List</button>
+        <button class="ribbon-tool-btn" onclick="exec('insertUnorderedList')">• List</button>
+        <button class="ribbon-tool-btn" onclick="insertLink()">🔗 Link</button>
+        <button class="ribbon-tool-btn" onclick="insertEmoji('😊')">😊 Emoji</button>
+    </div>
+
+    <div id="ribbon-layout" class="ribbon-group">
+        <button class="ribbon-tool-btn" onclick="changePadding('10mm')">Narrow</button>
+        <button class="ribbon-tool-btn" onclick="changePadding('25mm')">Normal</button>
+        <button class="ribbon-tool-btn" onclick="changePadding('40mm')">Wide</button>
+        <div class="v-sep"></div>
+        <button class="ribbon-tool-btn" onclick="toggleOrientation()">🔄 Rotate</button>
+        <button class="ribbon-tool-btn" onclick="setWatermark()">🏷️ Watermark</button>
+    </div>
+
+    <div id="ribbon-review" class="ribbon-group">
+        <button class="ribbon-tool-btn" id="btnFind" onclick="toggleSearch()">🔍 Find</button>
+        <button class="ribbon-tool-btn" onclick="cleanFormatting()">🧹 Clean</button>
+        <button class="ribbon-tool-btn" id="lockBtn" onclick="toggleReadonly()">🔒 Lock</button>
+        <div class="v-sep"></div>
+        <button class="ribbon-tool-btn" onclick="exportToHTML()">🌐 HTML</button>
+        <button class="ribbon-tool-btn" onclick="exportToDOCX()">📄 DOCX</button>
+        <button class="ribbon-tool-btn" onclick="exportToPDF()">📄 PDF</button>
+        <button class="ribbon-tool-btn" onclick="exportToImage()">🖼️ JPG</button>
+    </div>
+</div>
+
+<div class="workspace">
+    <div class="search-bar" id="searchBar">
+        <input type="text" id="findInput" placeholder="Find text...">
+        <input type="text" id="replaceInput" placeholder="Replace with...">
+        <button onclick="findAndReplace()" style="background:var(--primary); color:white; border:none; padding:5px 10px; border-radius:3px; cursor:pointer; font-weight:bold;">Replace All</button>
+        <button onclick="toggleSearch()" style="background:none; border:none; color:var(--text); cursor:pointer;">Close</button>
+    </div>
+
+    <div id="contextMenu" onmousedown="event.preventDefault()">
+        <div class="menu-item" onclick="handleCopy()">Copy <span>Ctrl+C</span></div>
+        <div class="menu-item" onclick="handleCut()">Cut <span>Ctrl+X</span></div>
+        <div class="menu-item" onclick="handlePaste()">Paste <span>Ctrl+V</span></div>
+        <div class="menu-sep" style="height:1px; background:#ccc; margin:5px 0;"></div>
+        <div class="menu-item" onclick="exec('superscript')">Superscript</div>
+        <div class="menu-item" onclick="exec('subscript')">Subscript</div>
+        <div class="menu-item" onclick="insertDateTime()">Insert Date/Time</div>
+    </div>
+
+    <div class="editor-frame" id="frame">
+        <div id="resizer-ui">
+            <div class="handle h-nw" data-handle="nw"></div>
+            <div class="handle h-n"  data-handle="n"></div>
+            <div class="handle h-ne" data-handle="ne"></div>
+            <div class="handle h-w"  data-handle="w"></div>
+            <div class="handle h-e"  data-handle="e"></div>
+            <div class="handle h-sw" data-handle="sw"></div>
+            <div class="handle h-s"  data-handle="s"></div>
+            <div class="handle h-se" data-handle="se"></div>
+        </div>
+
+        <div id="editor" class="page" contenteditable="true" 
+             oninput="updateStats(); autoSave();" 
+             onmouseup="saveSelection()" 
+             onkeyup="saveSelection()" 
+             onmousedown="checkImgSelect(event)"
+             oncontextmenu="showMenu(event)">
+            <div id="wm-text" class="watermark">DRAFT</div>
+            <h1>ASAS Writer v1.0</h1>
+            <p>Type <b>anything </b>here...</p>
+        </div>
+    </div>
+</div>
+
+<div class="status-bar">
+    <div id="wordCount">Words: 0 | Chars: 0 | Lines: 1</div>
+    <div class="zoom-controls">
+        <span id="zoomLevel">100%</span>
+        <input type="range" min="30" max="150" value="100" id="zoomRange" oninput="setZoom(this.value)">
+        <button onclick="window.print()" style="background:none; border:none; color:white; cursor:pointer;">🖨️ Print</button>
+    </div>
+</div>
+
+<script>
+    let tabs = [{ title: "Untitled", content: "<h1>ASAS Writer</h1><p>Start writing...</p>" }];
+    let activeTabIndex = 0;
+    let lastRange = null;
+    let currentImg = null;
+    let zoom = 1;
+
+    // --- NEW IMAGE RESIZER ENGINE ---
+    function checkImgSelect(e) {
+        if (e.target.tagName === 'IMG') {
+            currentImg = e.target;
+            updateResizerPos();
+            e.preventDefault();
+        } else {
+            hideResizer();
+        }
+    }
+
+    function updateResizerPos() {
+        if (!currentImg) return;
+        const ui = document.getElementById('resizer-ui');
+        const rect = currentImg.getBoundingClientRect();
+        const frameRect = document.getElementById('frame').getBoundingClientRect();
+        
+        ui.style.display = 'block';
+        ui.style.width = rect.width + 'px';
+        ui.style.height = rect.height + 'px';
+        ui.style.top = (rect.top - frameRect.top + document.getElementById('frame').scrollTop) + 'px';
+        ui.style.left = (rect.left - frameRect.left + document.getElementById('frame').scrollLeft) + 'px';
+    }
+
+    function hideResizer() {
+        currentImg = null;
+        document.getElementById('resizer-ui').style.display = 'none';
+    }
+
+    function checkDeselect(e) {
+        if (e.target.tagName !== 'IMG' && !e.target.classList.contains('handle')) {
+            hideResizer();
+        }
+    }
+
+    // Handle Dragging
+    let isResizing = false;
+    let activeHandle = null;
+    let startX, startY, startW, startH;
+
+    document.querySelectorAll('.handle').forEach(h => {
+        h.onmousedown = (e) => {
+            isResizing = true;
+            activeHandle = h.dataset.handle;
+            startX = e.clientX;
+            startY = e.clientY;
+            startW = currentImg.width;
+            startH = currentImg.height;
+            e.preventDefault();
+            e.stopPropagation();
+        };
+    });
+
+    window.onmousemove = (e) => {
+        if (!isResizing || !currentImg) return;
+        
+        const dx = (e.clientX - startX) / zoom;
+        const dy = (e.clientY - startY) / zoom;
+
+        if (activeHandle.includes('e')) currentImg.style.width = (startW + dx) + 'px';
+        if (activeHandle.includes('w')) currentImg.style.width = (startW - dx) + 'px';
+        if (activeHandle.includes('s')) currentImg.style.height = (startH + dy) + 'px';
+        if (activeHandle.includes('n')) currentImg.style.height = (startH - dy) + 'px';
+
+        updateResizerPos();
+    };
+
+    window.onmouseup = () => { isResizing = false; };
+    document.getElementById('frame').onscroll = updateResizerPos;
+
+    // --- SELECTION LOCK ENGINE ---
+    function saveSelection() {
+        const sel = window.getSelection();
+        if (sel.rangeCount > 0) { lastRange = sel.getRangeAt(0).cloneRange(); }
+    }
+    function restoreSelection() {
+        if (lastRange) {
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(lastRange);
+        }
+        document.getElementById('editor').focus();
+    }
+    function smartExec(type, value) {
+        restoreSelection();
+        const sel = window.getSelection();
+        if (!sel.rangeCount || sel.isCollapsed) return;
+        const span = document.createElement('span');
+        if (type === 'fontFamily') span.style.fontFamily = value;
+        if (type === 'fontSize') span.style.fontSize = value;
+        try {
+            const fragment = lastRange.extractContents();
+            span.appendChild(fragment);
+            lastRange.insertNode(span);
+            const newRange = document.createRange();
+            newRange.selectNodeContents(span);
+            sel.removeAllRanges();
+            sel.addRange(newRange);
+            lastRange = newRange.cloneRange();
+        } catch (e) {
+            document.execCommand(type === 'fontFamily' ? 'fontName' : 'fontSize', false, value);
+        }
+        updateStats();
+    }
+    function exec(cmd, val = null) {
+        restoreSelection();
+        document.execCommand(cmd, false, val);
+        saveSelection();
+        updateStats();
+    }
+
+    // --- REVIEW TAB ---
+    function toggleSearch() {
+        const bar = document.getElementById('searchBar');
+        const isVisible = bar.style.display === 'flex';
+        bar.style.display = isVisible ? 'none' : 'flex';
+        if (!isVisible) document.getElementById('findInput').focus();
+    }
+
+    function findAndReplace() {
+        const findStr = document.getElementById('findInput').value;
+        const replaceStr = document.getElementById('replaceInput').value;
+        if (!findStr) return;
+        const editor = document.getElementById('editor');
+        const escapedFind = findStr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(escapedFind, 'g');
+        editor.innerHTML = editor.innerHTML.replace(regex, replaceStr);
+        updateStats();
+    }
+
+    function cleanFormatting() {
+        if (confirm("Clear all text formatting?")) {
+            const editor = document.getElementById('editor');
+            editor.innerHTML = editor.innerText.replace(/\n/g, '<br>');
+            updateStats();
+        }
+    }
+
+    function toggleReadonly() {
+        const editor = document.getElementById('editor');
+        const lockBtn = document.getElementById('lockBtn');
+        const isLocked = editor.contentEditable === 'false';
+        editor.contentEditable = isLocked ? 'true' : 'false';
+        editor.classList.toggle('locked');
+        lockBtn.classList.toggle('active-lock');
+        lockBtn.innerHTML = isLocked ? "🔒 Lock" : "🔓 Unlock";
+        hideResizer();
+    }
+
+    // --- EXPORT FEATURES ---
+    function exportToPDF() {
+        hideResizer();
+        const element = document.getElementById('editor');
+        html2pdf().set({ margin: 0, filename: tabs[activeTabIndex].title + '.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } }).from(element).save();
+    }
+
+    function exportToDOCX() {
+        const content = document.getElementById('editor').innerHTML;
+        const source = 'data:application/vnd.ms-word;charset=utf-8,' + encodeURIComponent(content);
+        const link = document.createElement("a");
+        link.href = source;
+        link.download = tabs[activeTabIndex].title + '.docx';
+        link.click();
+    }
+
+    function exportToImage() {
+        hideResizer();
+        html2canvas(document.getElementById('editor'), { scale: 2 }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = tabs[activeTabIndex].title + '.jpg';
+            link.href = canvas.toDataURL('image/jpeg', 0.9);
+            link.click();
+        });
+    }
+
+    function exportToHTML() {
+        const blob = new Blob([document.getElementById('editor').innerHTML], {type: "text/html"});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = tabs[activeTabIndex].title + ".html";
+        a.click();
+    }
+
+    // --- UTILS & CORE ---
+    function handleFontUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const fontName = file.name.split('.')[0].replace(/\s/g, '_');
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const newStyle = document.createElement('style');
+            newStyle.textContent = `@font-face { font-family: '${fontName}'; src: url(${e.target.result}); }`;
+            document.head.appendChild(newStyle);
+            const picker = document.getElementById('fontPicker');
+            const opt = document.createElement('option');
+            opt.value = fontName; opt.innerHTML = "⭐ " + fontName;
+            picker.insertBefore(opt, picker.firstChild);
+            picker.value = fontName;
+            smartExec('fontFamily', fontName);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function insertImage() { const url = prompt("Enter Image URL:"); if (url) exec('insertHTML', `<img src="${url}" style="width:200px;">`); }
+    function insertLink() { const url = prompt("Enter URL:"); if (url) exec('createLink', url); }
+    function insertEmoji(e) { exec('insertHTML', e); }
+    function insertDateTime() { exec('insertHTML', new Date().toLocaleString()); }
+    function setWatermark() {
+        const txt = prompt("Watermark Text:");
+        const wm = document.getElementById('wm-text');
+        wm.innerText = txt || "";
+        wm.style.display = txt ? 'block' : 'none';
+    }
+    function changePadding(val) { document.getElementById('editor').style.padding = val; }
+    function toggleOrientation() {
+        const pg = document.getElementById('editor');
+        const isL = pg.style.width === '297mm';
+        pg.style.width = isL ? '210mm' : '297mm';
+        pg.style.minHeight = isL ? '297mm' : '210mm';
+        hideResizer();
+    }
+    function setZoom(val) {
+        zoom = val / 100;
+        document.getElementById('editor').style.transform = `scale(${zoom})`;
+        document.getElementById('zoomLevel').innerText = val + '%';
+        updateResizerPos();
+    }
+    function renderTabs() {
+        const bar = document.getElementById('tabBar');
+        bar.innerHTML = tabs.map((t, i) => `
+            <div class="tab ${i === activeTabIndex ? 'active' : ''}" onclick="switchTab(${i})">
+                📄 ${t.title} <span onclick="closeTab(${i}, event)" style="margin-left:8px;">×</span>
+            </div>
+        `).join('') + `<button onclick="addNewTab()" style="background:none; border:none; color:white; cursor:pointer; font-size:20px;">+</button>`;
+    }
+    function switchTab(i) {
+        tabs[activeTabIndex].content = document.getElementById('editor').innerHTML;
+        activeTabIndex = i;
+        document.getElementById('editor').innerHTML = tabs[i].content;
+        renderTabs();
+        updateStats();
+        hideResizer();
+    }
+    function addNewTab() {
+        const name = prompt("Doc Name:", "Doc " + (tabs.length + 1)) || "Untitled";
+        tabs.push({ title: name, content: "" });
+        switchTab(tabs.length - 1);
+    }
+    function closeTab(i, e) {
+        e.stopPropagation();
+        if(tabs.length > 1) { tabs.splice(i, 1); activeTabIndex = 0; switchTab(0); }
+    }
+    async function saveAsASWR() {
+        tabs[activeTabIndex].content = document.getElementById('editor').innerHTML;
+        const blob = new Blob([JSON.stringify(tabs[activeTabIndex])], {type: "application/json"});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = tabs[activeTabIndex].title + ".aswr";
+        a.click();
+    }
+    async function loadASWR() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.onchange = e => {
+            const reader = new FileReader();
+            reader.onload = ev => {
+                const data = JSON.parse(ev.target.result);
+                tabs.push({ title: data.title, content: data.content });
+                switchTab(tabs.length - 1);
+            };
+            reader.readAsText(e.target.files[0]);
+        };
+        input.click();
+    }
+    function autoSave() { localStorage.setItem('aswr_recovery', document.getElementById('editor').innerHTML); }
+    async function handleCopy() { restoreSelection(); await navigator.clipboard.writeText(window.getSelection().toString()); hideMenu(); }
+    async function handleCut() { restoreSelection(); await navigator.clipboard.writeText(window.getSelection().toString()); document.execCommand('delete'); hideMenu(); }
+    async function handlePaste() { restoreSelection(); const text = await navigator.clipboard.readText(); document.execCommand('insertText', false, text); hideMenu(); }
+    function updateStats() {
+        const text = document.getElementById('editor').innerText;
+        const words = text.trim().split(/\s+/).filter(w => w.length > 0).length;
+        document.getElementById('wordCount').innerText = `Words: ${words} | Chars: ${text.length} | Lines: ${text.split('\n').length}`;
+    }
+    const menu = document.getElementById('contextMenu');
+    function showMenu(e) { e.preventDefault(); saveSelection(); menu.style.display = 'block'; menu.style.left = e.clientX + 'px'; menu.style.top = e.clientY + 'px'; }
+    function hideMenu() { menu.style.display = 'none'; }
+    function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
+    function showRibbon(id) {
+        document.querySelectorAll('.ribbon-group').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.ribbon-tab-link').forEach(el => el.classList.remove('active'));
+        const target = document.getElementById('ribbon-' + id);
+        if (target) target.classList.add('active');
+        if (event) event.target.classList.add('active');
+    }
+    function insertTable() { exec('insertHTML', '<table border="1" style="width:100%; border-collapse:collapse;"><tr><td>&nbsp;</td><td>&nbsp;</td></tr></table><p></p>'); }
+    window.onload = () => { renderTabs(); updateStats(); };
+</script>
+</body>
+</html>

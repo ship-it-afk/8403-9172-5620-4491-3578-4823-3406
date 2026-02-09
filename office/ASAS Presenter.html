@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="images/presenter.png">
+    <title>ASAS Presenter V1.0</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/white.min.css" id="theme">
+    
+    <style>
+        :root {
+            --primary: #b7472a; 
+            --ribbon-bg: #f3f2f1;
+            --border: #d1d1d1;
+            --text: #333;
+            --sidebar-bg: #fff;
+        }
+
+        body.dark-mode {
+            --ribbon-bg: #2d2d2d;
+            --border: #444;
+            --text: #e0e0e0;
+            --sidebar-bg: #333;
+            background: #1e1e1e;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; color: var(--text); }
+
+        /* HEADER & RIBBON */
+        .tab-bar { background: var(--primary); display: flex; padding: 0 10px; height: 40px; align-items: center; color: white; justify-content: space-between; }
+        .file-actions { display: flex; gap: 10px; margin-left: 20px; }
+        .file-btn { background: #107c10; color: white; border: none; padding: 4px 12px; border-radius: 3px; cursor: pointer; font-weight: bold; font-size: 12px; }
+        .file-btn.open { background: rgba(255,255,255,0.2); }
+
+        .ribbon { background: var(--ribbon-bg); border-bottom: 1px solid var(--border); padding: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 10; }
+        .ribbon-tabs { display: flex; gap: 15px; padding: 0 10px; margin-bottom: 5px; }
+        .ribbon-tab-link { font-size: 12px; cursor: pointer; padding: 2px 8px; color: var(--text); opacity: 0.7; text-transform: uppercase; font-weight: 600; }
+        .ribbon-tab-link.active { opacity: 1; border-bottom: 2px solid var(--primary); }
+        .ribbon-group { display: none; padding: 5px 10px; gap: 12px; align-items: center; height: 70px; }
+        .ribbon-group.active { display: flex; }
+        
+        .tool-btn { border: 1px solid transparent; background: transparent; padding: 5px; border-radius: 3px; cursor: pointer; display: flex; flex-direction: column; align-items: center; font-size: 11px; min-width: 50px; color: var(--text); }
+        .tool-btn:hover { background: rgba(0,0,0,0.05); border: 1px solid var(--border); }
+
+        /* MAIN LAYOUT */
+        .main-container { flex: 1; display: flex; overflow: hidden; background: #e6e6e6; }
+        .slide-sorter { width: 200px; background: var(--sidebar-bg); border-right: 1px solid var(--border); overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+        .thumb { width: 100%; aspect-ratio: 16/9; background: white; border: 2px solid #ccc; cursor: pointer; position: relative; display: flex; align-items: center; justify-content: center; font-size: 10px; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); overflow: hidden; text-align: center; padding: 5px; box-sizing: border-box; }
+        .thumb.active { border-color: var(--primary); outline: 2px solid var(--primary); }
+        .thumb-num { position: absolute; left: 2px; top: 2px; color: #666; font-size: 9px; font-weight: bold; }
+
+        .editor-container { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; padding: 40px; }
+        .reveal-viewport { width: 100% !important; height: 100% !important; background: white; box-shadow: 0 10px 30px rgba(0,0,0,0.2); pointer-events: auto !important; }
+        .reveal .slides section { pointer-events: auto !important; height: 100%; }
+
+        /* OBJECT HANDLES */
+        .resizable { position: absolute; cursor: move; border: 1px solid transparent; min-width: 40px; min-height: 40px; }
+        .resizable.active { border: 1.5px dashed var(--primary); z-index: 100; }
+        .handle { width: 10px; height: 10px; background: #fff; border: 1.5px solid var(--primary); position: absolute; display: none; }
+        .resizable.active .handle { display: block; }
+        
+        /* 8 Positions */
+        .nw { top: -6px; left: -6px; cursor: nw-resize; }
+        .n  { top: -6px; left: 50%; transform: translateX(-50%); cursor: n-resize; }
+        .ne { top: -6px; right: -6px; cursor: ne-resize; }
+        .e  { top: 50%; right: -6px; transform: translateY(-50%); cursor: e-resize; }
+        .se { bottom: -6px; right: -6px; cursor: se-resize; }
+        .s  { bottom: -6px; left: 50%; transform: translateX(-50%); cursor: s-resize; }
+        .sw { bottom: -6px; left: -6px; cursor: sw-resize; }
+        .w  { top: 50%; left: -6px; transform: translateY(-50%); cursor: w-resize; }
+
+        .present-btn { position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 30px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1000; }
+        .properties { width: 220px; background: var(--sidebar-bg); border-left: 1px solid var(--border); padding: 15px; font-size: 12px; }
+    </style>
+</head>
+<body onclick="deselectAll(event)">
+
+<div class="tab-bar">
+    <div style="display:flex; align-items:center;">
+        <strong style="margin-right: 20px;">ASAS Presenter V1.0</strong>
+        <div class="file-actions">
+            <button class="file-btn" onclick="saveASP()">💾 SAVE .ASP</button>
+            <button class="file-btn open" onclick="document.getElementById('fileInput').click()">📂 OPEN</button>
+            <input type="file" id="fileInput" accept=".asp" hidden onchange="loadASP(event)">
+        </div>
+    </div>
+    <span id="fileNameDisplay" style="font-size: 12px; opacity: 0.8; margin-right: 15px;">Presentation1.asp</span>
+</div>
+
+<div class="ribbon">
+    <div class="ribbon-tabs">
+        <span class="ribbon-tab-link active" onclick="showRibbon('home')">Home</span>
+        <span class="ribbon-tab-link" onclick="showRibbon('insert')">Insert</span>
+        <span class="ribbon-tab-link" onclick="showRibbon('transitions')">Transitions</span>
+        <span class="ribbon-tab-link" onclick="showRibbon('design')">Design</span>
+    </div>
+
+    <div id="ribbon-home" class="ribbon-group active">
+        <button class="tool-btn" onclick="addNewSlide()">✨<br>New Slide</button>
+        <div style="width:1px; height:40px; background:#ccc;"></div>
+        <button class="tool-btn" onclick="document.execCommand('bold')"><b>B</b><br>Bold</button>
+        <button class="tool-btn" onclick="document.execCommand('italic')"><i>I</i><br>Italic</button>
+        <button class="tool-btn" onclick="deleteCurrentSlide()" style="color: #a30000;">🗑️<br>Delete</button>
+    </div>
+
+    <div id="ribbon-insert" class="ribbon-group">
+        <button class="tool-btn" onclick="addResizer('text')">📄<br>Text Box</button>
+        <button class="tool-btn" onclick="addResizer('img')">🖼️<br>Picture</button>
+        <button class="tool-btn" onclick="addResizer('shape')">⬠<br>Shape</button>
+    </div>
+
+    <div id="ribbon-transitions" class="ribbon-group">
+        <button class="tool-btn" onclick="setTransition('fade')">Fade</button>
+        <button class="tool-btn" onclick="setTransition('slide')">Slide</button>
+        <button class="tool-btn" onclick="setTransition('zoom')">Zoom</button>
+    </div>
+
+    <div id="ribbon-design" class="ribbon-group">
+        <button class="tool-btn" onclick="setTheme('white')">Light</button>
+        <button class="tool-btn" onclick="setTheme('black')">Dark</button>
+        <button class="tool-btn" onclick="toggleDarkMode()">🌓<br>UI Theme</button>
+    </div>
+</div>
+
+<div class="main-container">
+    <div class="slide-sorter" id="slideSorter"></div>
+    <div class="editor-container">
+        <div class="reveal" id="revealEditor">
+            <div class="slides" id="slidesContainer">
+                <section>
+                    <div class="resizable active" style="top:20%; left:20%;" onmousedown="initDrag(event)">
+                        <h1 contenteditable="true">ASAS Presenter</h1>
+                        <h3 contenteditable="true">Select me to see handles</h3>
+                        <div class="handle nw"></div><div class="handle n"></div><div class="handle ne"></div>
+                        <div class="handle e"></div><div class="handle se"></div><div class="handle s"></div>
+                        <div class="handle sw"></div><div class="handle w"></div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <div class="properties">
+        <div class="prop-group">
+            <label>Slide Settings</label>
+            <p>Background Color:</p>
+            <input type="color" id="bgColorPicker" oninput="changeSlideBg(this.value)" value="#ffffff">
+        </div>
+    </div>
+</div>
+
+<button class="present-btn" onclick="startPresentation()">▶ Play Presentation</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.js"></script>
+
+<script>
+    let currentTheme = 'white';
+    let currentTransition = 'slide';
+
+    let deck = new Reveal(document.querySelector('#revealEditor'), {
+        embedded: true, hash: false, margin: 0.1, center: false,
+        transition: currentTransition, controls: true, progress: true
+    });
+    deck.initialize();
+
+    // --- TRANSFORMATION ENGINE ---
+    function addResizer(type) {
+        const slide = deck.getCurrentSlide();
+        const div = document.createElement('div');
+        div.className = 'resizable active';
+        div.style.top = '100px'; div.style.left = '100px';
+        
+        let inner = '';
+        if(type === 'text') inner = '<div contenteditable="true" style="font-size:24px; min-width:200px;">New Text Box</div>';
+        if(type === 'img') inner = `<img src="${prompt('URL:', 'https://picsum.photos/400/250')}" style="width:100%; pointer-events:none;">`;
+        if(type === 'shape') inner = '<div style="width:150px; height:100px; background:var(--primary);"></div>';
+
+        const handles = '<div class="handle nw"></div><div class="handle n"></div><div class="handle ne"></div><div class="handle e"></div><div class="handle se"></div><div class="handle s"></div><div class="handle sw"></div><div class="handle w"></div>';
+        div.innerHTML = inner + handles;
+        slide.appendChild(div);
+        rebind();
+    }
+
+    function initDrag(e) {
+        e.stopPropagation();
+        const el = e.currentTarget;
+        if(e.target.hasAttribute('contenteditable')) return; 
+
+        deselectAll();
+        el.classList.add('active');
+        
+        const sX = e.clientX, sY = e.clientY, sT = el.offsetTop, sL = el.offsetLeft, sW = el.offsetWidth, sH = el.offsetHeight;
+
+        if (e.target.classList.contains('handle')) {
+            const h = e.target;
+            window.onmousemove = (m) => {
+                const dx = m.clientX - sX, dy = m.clientY - sY;
+                if (h.classList.contains('e')) el.style.width = sW + dx + 'px';
+                if (h.classList.contains('s')) el.style.height = sH + dy + 'px';
+                if (h.classList.contains('se')) { el.style.width = sW + dx + 'px'; el.style.height = sH + dy + 'px'; }
+                if (h.classList.contains('sw')) { el.style.width = sW - dx + 'px'; el.style.left = sL + dx + 'px'; el.style.height = sH + dy + 'px'; }
+                if (h.classList.contains('ne')) { el.style.width = sW + dx + 'px'; el.style.top = sT + dy + 'px'; el.style.height = sH - dy + 'px'; }
+                if (h.classList.contains('n'))  { el.style.top = sT + dy + 'px'; el.style.height = sH - dy + 'px'; }
+                if (h.classList.contains('w'))  { el.style.left = sL + dx + 'px'; el.style.width = sW - dx + 'px'; }
+            };
+        } else {
+            window.onmousemove = (m) => {
+                el.style.top = sT + (m.clientY - sY) + 'px';
+                el.style.left = sL + (m.clientX - sX) + 'px';
+            };
+        }
+        window.onmouseup = () => { window.onmousemove = null; updateThumbnails(); };
+    }
+
+    function rebind() {
+        document.querySelectorAll('.resizable').forEach(el => {
+            el.onmousedown = initDrag;
+        });
+    }
+
+    function deselectAll(e) {
+        if (e && e.target.closest('.resizable')) return;
+        document.querySelectorAll('.resizable').forEach(r => r.classList.remove('active'));
+    }
+
+    // --- CORE SLIDE LOGIC ---
+    function addNewSlide() {
+        const slides = document.getElementById('slidesContainer');
+        const s = document.createElement('section');
+        s.innerHTML = `<div class="resizable active" style="top:100px; left:100px;">
+            <h2 contenteditable="true">New Slide</h2>
+            <div class="handle nw"></div><div class="handle n"></div><div class="handle ne"></div><div class="handle e"></div><div class="handle se"></div><div class="handle s"></div><div class="handle sw"></div><div class="handle w"></div>
+        </div>`;
+        slides.appendChild(s);
+        deck.sync();
+        deck.slide(deck.getSlides().length - 1);
+        rebind();
+        updateThumbnails();
+    }
+
+    function updateThumbnails() {
+        const sorter = document.getElementById('slideSorter');
+        sorter.innerHTML = '';
+        deck.getSlides().forEach((slide, index) => {
+            const thumb = document.createElement('div');
+            thumb.className = `thumb ${index === deck.getState().indexh ? 'active' : ''}`;
+            thumb.innerHTML = `<span class="thumb-num">${index + 1}</span>Slide ${index + 1}`;
+            thumb.onclick = () => deck.slide(index);
+            sorter.appendChild(thumb);
+        });
+    }
+
+    function showRibbon(id) {
+        document.querySelectorAll('.ribbon-group, .ribbon-tab-link').forEach(el => el.classList.remove('active'));
+        document.getElementById('ribbon-' + id).classList.add('active');
+        if(event) event.target.classList.add('active');
+    }
+
+    function deleteCurrentSlide() {
+        if(deck.getSlides().length <= 1) return;
+        deck.getSlides()[deck.getState().indexh].remove();
+        deck.sync();
+        updateThumbnails();
+    }
+
+    function setTransition(type) { deck.configure({ transition: type }); }
+    function setTheme(t) { document.getElementById('theme').href = `https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/${t}.min.css`; }
+    function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
+    function changeSlideBg(color) { deck.getCurrentSlide().setAttribute('data-background-color', color); deck.sync(); }
+    function startPresentation() { deselectAll(); document.getElementById('revealEditor').requestFullscreen(); }
+
+    function saveASP() {
+        const data = { slides: Array.from(document.querySelectorAll('#slidesContainer section')).map(s => s.innerHTML) };
+        const blob = new Blob([JSON.stringify(data)], {type: "application/json"});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = "Presentation.asp";
+        a.click();
+    }
+
+    function loadASP(e) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const data = JSON.parse(ev.target.result);
+            document.getElementById('slidesContainer').innerHTML = data.slides.map(s => `<section>${s}</section>`).join('');
+            deck.sync();
+            rebind();
+            updateThumbnails();
+        };
+        reader.readAsText(e.target.files[0]);
+    }
+
+    deck.on('slidechanged', () => { rebind(); updateThumbnails(); });
+    window.onload = () => { rebind(); updateThumbnails(); };
+</script>
+
+</body>
+</html>
