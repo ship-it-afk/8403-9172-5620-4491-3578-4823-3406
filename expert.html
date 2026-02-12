@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASAS Expert Support</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        :root {
+            --glass: rgba(255, 255, 255, 0.08);
+            --border: rgba(255, 255, 255, 0.15);
+            --accent: #00f2fe;
+            --accent-2: #4facfe;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top left, #1a1a2e, #16213e);
+            overflow: hidden;
+            color: white;
+        }
+
+        /* 2026 Ambient Background Glow */
+        body::before {
+            content: "";
+            position: absolute;
+            width: 400px; height: 400px;
+            background: var(--accent);
+            filter: blur(180px);
+            top: -50px; left: -50px;
+            z-index: -1;
+            opacity: 0.4;
+            animation: float 15s infinite alternate ease-in-out;
+        }
+
+        @keyframes float { 
+            from { transform: translate(0, 0) scale(1); } 
+            to { transform: translate(120px, 80px) scale(1.2); } 
+        }
+
+        /* Navigation Bar */
+        nav {
+            position: fixed;
+            top: 20px;
+            width: 90%;
+            max-width: 1200px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 30px;
+            background: var(--glass);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            z-index: 1000;
+            opacity: 0; /* Animated via GSAP */
+            transform: translateY(-20px);
+        }
+
+        .logo { font-weight: 900; letter-spacing: -1px; font-size: 1.2rem; }
+
+        .nav-links { display: flex; gap: 15px; }
+
+        .nav-btn {
+            background: transparent;
+            border: 1px solid transparent;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .nav-btn:hover {
+            background: var(--glass);
+            border-color: var(--border);
+        }
+
+        .nav-btn.active {
+            background: white;
+            color: black;
+        }
+
+        /* Glassmorphism Card */
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: 45px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.4);
+            transform: translateY(40px);
+            opacity: 0; /* Animated via GSAP */
+        }
+
+        h2 {
+            font-weight: 800;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            letter-spacing: -1.5px;
+            background: linear-gradient(to right, #fff, #a5a5a5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p { color: rgba(255,255,255,0.5); margin-bottom: 35px; font-size: 0.95rem; line-height: 1.5; }
+
+        .input-group { margin-bottom: 18px; }
+
+        input, textarea {
+            width: 100%;
+            padding: 18px;
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-sizing: border-box;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: rgba(0, 0, 0, 0.45);
+        }
+
+        button#submitBtn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--accent-2) 0%, var(--accent) 100%);
+            color: #000;
+            font-weight: 800;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Success Toast */
+        #statusOverlay {
+            position: fixed;
+            bottom: 30px;
+            padding: 18px 30px;
+            border-radius: 16px;
+            background: #00ff95;
+            color: #000;
+            font-weight: 800;
+            display: none;
+            z-index: 1001;
+            box-shadow: 0 20px 40px rgba(0, 255, 149, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <nav id="navbar">
+        <div class="logo">ASAS Expert Support</div>
+        <div class="nav-links">
+            <a href="#" class="nav-btn active">Support</a>
+            <a href="index.html" class="nav-btn">Home</a>
+        </div>
+    </nav>
+
+    <div id="statusOverlay">Your support sent, it may take a few days to reply to your Gmail inbox... Kindly check daily...</div>
+
+    <div class="card" id="formCard">
+        <h2>Expert Tech Support</h2>
+        <p>Your support message will be transmitted to our expert engineer.</p>
+        
+        <form id="contactForm">
+            <div class="input-group">
+                <input type="email" id="email" placeholder="Your Gmail email address" required>
+            </div>
+            <div class="input-group">
+                <textarea id="message" placeholder="Message content..." required></textarea>
+            </div>
+            <button type="submit" id="submitBtn">Send Now</button>
+        </form>
+    </div>
+
+    <script>
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbxBMLxE5wmGxTkQRswMz6MnSrAjHDsajRNQQeLOC2lx3L50ifr7evhsSXq93ioKORnJcg/exec';
+        const form = document.getElementById('contactForm');
+        const card = document.getElementById('formCard');
+        const nav = document.getElementById('navbar');
+        const btn = document.getElementById('submitBtn');
+        const status = document.getElementById('statusOverlay');
+
+        // Combined 2026 Entrance Sequence
+        window.addEventListener('DOMContentLoaded', () => {
+            const tl = gsap.timeline();
+            tl.to(nav, { opacity: 1, y: 0, duration: 1, ease: "power4.out" })
+              .to(card, { opacity: 1, y: 0, duration: 1.2, ease: "expo.out" }, "-=0.6");
+        });
+
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            
+            gsap.to(btn, { scale: 0.96, duration: 0.1 });
+            btn.disabled = true;
+            btn.innerText = "Sending...";
+
+            const formData = {
+                email: document.getElementById('email').value,
+                message: document.getElementById('message').value
+            };
+
+            fetch(scriptURL, {
+                method: 'POST',
+                mode: 'no-cors',
+                body: JSON.stringify(formData)
+            })
+            .then(() => {
+                btn.disabled = false;
+                btn.innerText = "Send Now!!";
+                form.reset();
+                
+                // Show Success Toast from bottom
+                status.style.display = 'block';
+                gsap.fromTo(status, { y: 100, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: "back.out(1.7)" });
+                
+                setTimeout(() => {
+                    gsap.to(status, { opacity: 0, y: 50, duration: 0.4, onComplete: () => status.style.display = 'none' });
+                }, 3500);
+            })
+            .catch(error => {
+                btn.disabled = false;
+                btn.innerText = "Error - Retry";
+                console.error('Error!', error.message);
+            });
+        });
+    </script>
+</body>
+</html>
