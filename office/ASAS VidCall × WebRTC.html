@@ -182,13 +182,19 @@
             const myId = document.getElementById('my-id-input').value;
             if (!myId) return alert("Enter code!");
 
-            // STUN Servers help the internet "find" you
+            // UPDATED CONFIG: Added TURN relay server to bypass 4G firewalls
             peer = new Peer(myId, {
                 config: {
                     'iceServers': [
                         { url: 'stun:stun1.l.google.com:19302' },
-                        { url: 'stun:stun2.l.google.com:19302' }
-                    ]
+                        { url: 'stun:stun2.l.google.com:19302' },
+                        {
+                            urls: 'turn:openrelay.metered.ca:443',
+                            username: 'openrelayproject',
+                            credential: 'openrelayproject'
+                        }
+                    ],
+                    'sdpSemantics': 'unified-plan'
                 }
             });
 
@@ -330,7 +336,10 @@
             video.srcObject = stream; 
             video.autoplay = true; 
             video.playsInline = true;
-            // REMOVED MUTED: Remote people will now have sound immediately
+            
+            // FIX: Explicitly play for mobile browsers
+            video.onloadedmetadata = () => video.play().catch(e => console.error(e));
+
             const label = document.createElement('div');
             label.className = 'user-label'; 
             label.id = `label-${id}`; 
