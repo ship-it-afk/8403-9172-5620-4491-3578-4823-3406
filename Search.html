@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASAS Global Search</title>
+    <style>
+        :root {
+            --bg: #050505;
+            --card-bg: rgba(20, 20, 20, 0.6);
+            --accent-blue: #007AFF;
+            --accent-red: #FF3B30;
+            --text-primary: #f5f5f7;
+            --text-secondary: #86868b;
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, system-ui, sans-serif;
+            background-color: var(--bg);
+            background-image: radial-gradient(circle at 50% -20%, #1c1c1e, #050505);
+            color: var(--text-primary);
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: padding 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        body.home-state { padding-top: 30vh; }
+        body.search-state { padding-top: 40px; }
+
+        .hero-logo {
+            font-size: 4rem;
+            font-weight: 800;
+            letter-spacing: -2px;
+            margin-bottom: 30px;
+            background: linear-gradient(to bottom, #fff, #444);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            transition: 0.5s ease;
+        }
+
+        body.search-state .hero-logo {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            letter-spacing: 0;
+        }
+
+        .search-area {
+            width: 100%;
+            max-width: 700px;
+            z-index: 100;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        .search-container {
+            display: flex;
+            gap: 12px;
+            background: var(--card-bg);
+            padding: 8px 12px;
+            border-radius: 100px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        input {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            background: transparent;
+            color: white;
+            font-size: 17px;
+            outline: none;
+        }
+
+        button {
+            padding: 12px 32px;
+            border-radius: 100px;
+            border: none;
+            background: var(--text-primary);
+            color: black;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.03);
+            background: #fff;
+        }
+
+        #results {
+            width: 100%;
+            max-width: 900px;
+            margin-top: 40px;
+            padding: 0 20px;
+            display: grid;
+            gap: 20px;
+            box-sizing: border-box;
+        }
+
+        .result {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            transition: border 0.3s, transform 0.3s;
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        .result a {
+            font-size: 20px;
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .result p { color: var(--text-secondary); font-size: 15px; margin: 0; }
+
+        .badge {
+            font-size: 10px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 6px;
+            display: inline-block;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .badge-web { background: rgba(0, 122, 255, 0.15); color: var(--accent-blue); }
+        .badge-news { background: rgba(255, 59, 48, 0.15); color: var(--accent-red); }
+
+        .status { text-align: center; padding: 40px; color: var(--text-secondary); }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="home-state">
+
+    <div class="hero-logo" id="nexusLogo">ASAS Search</div>
+
+    <div class="search-area">
+        <div class="search-container">
+            <input type="text" id="query" placeholder="Search Anything..." autocomplete="off" onkeypress="if(event.key==='Enter') search()">
+            <button onclick="search()">SEARCH</button>
+        </div>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        const PROXIES = [
+            (url) => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+            (url) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+            (url) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+        ];
+
+        async function fetchWithFallback(targetUrl) {
+            for (let i = 0; i < PROXIES.length; i++) {
+                try {
+                    const proxyUrl = PROXIES[i](targetUrl);
+                    const response = await fetch(proxyUrl);
+                    if (!response.ok) continue;
+
+                    let rawContent;
+                    const contentType = response.headers.get("content-type");
+                    
+                    // Logic fix: handle both JSON-wrapped and direct text responses
+                    if (contentType && contentType.includes("application/json")) {
+                        const data = await response.json();
+                        rawContent = data.contents || data;
+                    } else {
+                        rawContent = await response.text();
+                    }
+
+                    if (!rawContent || rawContent.length < 100) continue;
+
+                    const parser = new DOMParser();
+                    const xml = parser.parseFromString(rawContent, "text/xml");
+                    const items = xml.querySelectorAll("item");
+                    if (items.length > 0) return Array.from(items);
+                } catch (e) {
+                    console.warn(`Node ${i} fail, rotating...`);
+                }
+            }
+            return [];
+        }
+
+        async function search() {
+            const q = document.getElementById('query').value;
+            const resDiv = document.getElementById('results');
+            if(!q) return;
+
+            document.body.classList.replace('home-state', 'search-state');
+            resDiv.innerHTML = "<div class='status'>Uplink established. Scanning global indices...</div>";
+
+            try {
+                const [webItems, newsItems] = await Promise.all([
+                    fetchWithFallback(`https://www.bing.com/search?q=${encodeURIComponent(q)}&format=rss`),
+                    fetchWithFallback(`https://news.google.com/rss/search?q=${encodeURIComponent(q)}&hl=en-US&gl=US&ceid=US:en`)
+                ]);
+
+                resDiv.innerHTML = "";
+
+                if (webItems.length === 0 && newsItems.length === 0) {
+                    resDiv.innerHTML = "<div class='status'>Signal blocked by host. Try a different query or wait 5 seconds.</div>";
+                    return;
+                }
+
+                const render = (item, type) => {
+                    const title = item.querySelector("title")?.textContent || "Source Unnamed";
+                    const link = item.querySelector("link")?.textContent || "#";
+                    let desc = item.querySelector("description")?.textContent || "No snippet available.";
+                    desc = desc.replace(/<[^>]*>?/gm, '').substring(0, 250);
+
+                    const label = type === 'web' ? 'Global Web' : 'Live News';
+                    const bClass = type === 'web' ? 'badge-web' : 'badge-news';
+
+                    resDiv.innerHTML += `
+                        <div class="result">
+                            <span class="badge ${bClass}">${label}</span>
+                            <a href="${link}" target="_blank">${title}</a>
+                            <p>${desc}...</p>
+                        </div>`;
+                };
+
+                const count = Math.max(webItems.length, newsItems.length);
+                for (let i = 0; i < count; i++) {
+                    if (newsItems[i]) render(newsItems[i], 'news');
+                    if (webItems[i]) render(webItems[i], 'web');
+                }
+            } catch (err) {
+                resDiv.innerHTML = "<div class='status'>Network Protocol Failure.</div>";
+            }
+        }
+    </script>
+</body>
+</html>
