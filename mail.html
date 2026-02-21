@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASAS Mail | 2026 Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #a855f7;
+            --bg: #0f172a;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text: #f1f5f9;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background: radial-gradient(circle at top right, #1e1b4b, #0f172a); 
+            color: var(--text);
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; margin: 0; overflow-x: hidden;
+        }
+
+        .app-container { 
+            width: 90%; max-width: 480px; 
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 40px; border-radius: 24px; 
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .hidden { display: none !important; }
+
+        h2 { font-weight: 600; letter-spacing: -1px; margin-bottom: 30px; text-align: center; font-size: 28px; }
+        
+        input, textarea { 
+            width: 100%; padding: 14px; margin: 10px 0; 
+            background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border);
+            border-radius: 12px; color: white; font-size: 15px;
+            transition: all 0.3s; box-sizing: border-box;
+        }
+
+        input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
+
+        button { 
+            width: 100%; padding: 14px; border: none; border-radius: 12px; 
+            cursor: pointer; font-weight: 600; margin-top: 15px; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            font-size: 15px;
+        }
+
+        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.5); }
+        .btn-primary:active { transform: translateY(0); }
+
+        .btn-ghost { background: transparent; color: #94a3b8; border: 1px solid var(--glass-border); }
+        .btn-ghost:hover { background: rgba(255,255,255,0.05); color: white; }
+
+        /* Dashboard Tabs */
+        .nav-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px; }
+        .nav-btn { padding: 12px; font-size: 13px; margin: 0; background: rgba(255,255,255,0.05); color: #cbd5e1; }
+        .nav-btn.active { background: var(--primary); color: white; }
+
+        /* Email Cards 2026 Style */
+        .email-card { 
+            background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);
+            padding: 20px; margin: 15px 0; border-radius: 16px; 
+            position: relative; transition: 0.3s;
+        }
+        .email-card:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.2); }
+        
+        .email-header { font-weight: 600; color: #fff; font-size: 16px; margin-bottom: 4px; display: block; }
+        .email-sender { font-size: 12px; color: var(--primary); margin-bottom: 12px; font-weight: 500; }
+        .email-text { font-size: 14px; color: #94a3b8; line-height: 1.6; }
+        
+        .delete-btn { 
+            position: absolute; right: 15px; top: 15px; 
+            color: #ef4444; cursor: pointer; opacity: 0.3; transition: 0.3s;
+            font-size: 18px;
+        }
+        .email-card:hover .delete-btn { opacity: 1; }
+
+        #loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            animation: loadAnim 2s infinite linear;
+            display: none;
+        }
+        @keyframes loadAnim { from { left: -100%; } to { left: 100%; } }
+    </style>
+</head>
+<body>
+
+<div id="loading-overlay"></div>
+
+<div class="app-container">
+    <div id="auth-box">
+        <h2 id="main-title">ASAS Mail</h2>
+        <div id="auth-choice">
+            <button class="btn-primary" onclick="showForm('login')">Sign In</button>
+            <button class="btn-ghost" onclick="showForm('signup')">Create Account</button>
+        </div>
+
+        <div id="form-container" class="hidden">
+            <h3 id="form-title" style="text-align:center; margin-bottom: 20px;"></h3>
+            <input type="text" id="f-user" class="hidden" placeholder="Username">
+            <input type="email" id="f-email" placeholder="Email Address">
+            <input type="password" id="f-pass" placeholder="Password">
+            <button class="btn-primary" onclick="handleAuth()">Continue</button>
+            <button class="btn-ghost" onclick="location.reload()">Back</button>
+        </div>
+    </div>
+
+    <div id="dashboard" class="hidden">
+        <h2 id="welcome-txt" style="font-size: 20px; text-align: left; margin-bottom: 20px;"></h2>
+        
+        <div class="nav-grid">
+            <button id="tab-inbox" class="nav-btn btn-ghost active" onclick="getInbox()">Inboxes</button>
+            <button id="tab-compose" class="nav-btn btn-ghost" onclick="showCompose()">Compose</button>
+        </div>
+
+        <div id="inbox-view" class="hidden">
+            <div id="email-list"></div>
+        </div>
+
+        <div id="compose-view" class="hidden">
+            <input type="email" id="m-to" placeholder="Recipient Email">
+            <input type="text" id="m-title" placeholder="Email Title">
+            <textarea id="m-body" rows="6" placeholder="Write your email content here..."></textarea>
+            <button class="btn-primary" onclick="sendEmail()">Send It Now!</button>
+        </div>
+
+        <button class="btn-ghost" onclick="location.reload()" style="margin-top:40px; border:none; font-size: 13px;">Sign Out</button>
+    </div>
+</div>
+
+<script>
+    // 1. UPDATE THIS URL
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzPh8vfVx32QO1E5DH5WmJk9XSpmkl5Fv_RQwRtDV5Pb0J03zTMgqBzmvq0Dh8wGacL0w/exec";
+
+    let user = null;
+    let mode = 'login';
+
+    function showForm(m) {
+        mode = m;
+        document.getElementById('auth-choice').classList.add('hidden');
+        document.getElementById('form-container').classList.remove('hidden');
+        document.getElementById('form-title').innerText = m === 'login' ? 'Sign In' : 'New Account';
+        document.getElementById('f-user').classList.toggle('hidden', m === 'login');
+    }
+
+    async function api(data) {
+        document.getElementById('loading-overlay').style.display = 'block';
+        try {
+            const res = await fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(data) });
+            const json = await res.json();
+            document.getElementById('loading-overlay').style.display = 'none';
+            return json;
+        } catch (e) {
+            document.getElementById('loading-overlay').style.display = 'none';
+            alert("Signed Out / Network Error");
+            return { status: "Error" };
+        }
+    }
+
+    async function handleAuth() {
+        const res = await api({
+            action: mode,
+            username: document.getElementById('f-user').value,
+            email: document.getElementById('f-email').value,
+            password: document.getElementById('f-pass').value
+        });
+        if (res.status === "Success") {
+            if (mode === 'signup') { alert("Welcome! Please sign in."); location.reload(); }
+            else {
+                user = res;
+                document.getElementById('auth-box').classList.add('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
+                document.getElementById('welcome-txt').innerText = "Hi, " + res.username;
+                getInbox();
+            }
+        } else { alert(res.message || "Auth Failed"); }
+    }
+
+    async function getInbox() {
+        updateTabs('tab-inbox');
+        showSection('inbox-view');
+        const res = await api({ action: 'getInboxes', rowIndex: user.rowIndex });
+        const list = document.getElementById('email-list');
+        list.innerHTML = "";
+        
+        if (res.emails && res.emails.length > 0) {
+            res.emails.forEach((raw, index) => {
+                const parts = raw.split('))');
+                const title = parts[0] || "No Subject";
+                const from = parts[1] || "Unknown";
+                const body = parts[2] || "";
+
+                const card = document.createElement('div');
+                card.className = 'email-card';
+                card.innerHTML = `
+                    <div class="delete-btn" onclick="deleteMail(${index})">×</div>
+                    <span class="email-header">${title}</span>
+                    <div class="email-sender">${from}</div>
+                    <div class="email-text">${body}</div>
+                `;
+                list.appendChild(card);
+            });
+        } else {
+            list.innerHTML = "<p style='text-align:center; color:#64748b; margin-top:40px;'>No emails found.</p>";
+        }
+    }
+
+    function showCompose() {
+        updateTabs('tab-compose');
+        showSection('compose-view');
+    }
+
+    async function deleteMail(colIdx) {
+        if(!confirm("Delete this encrypted record?")) return;
+        const res = await api({ action: 'delete', rowIndex: user.rowIndex, colIndex: colIdx });
+        if(res.status === "Success") getInbox();
+    }
+
+    async function sendEmail() {
+        const res = await api({
+            action: 'send',
+            from: user.email,
+            to: document.getElementById('m-to').value,
+            title: document.getElementById('m-title').value,
+            message: document.getElementById('m-body').value
+        });
+        alert(res.message);
+        if(res.status === "Success") getInbox();
+    }
+
+    function showSection(id) {
+        document.getElementById('inbox-view').classList.add('hidden');
+        document.getElementById('compose-view').classList.add('hidden');
+        document.getElementById(id).classList.remove('hidden');
+    }
+
+    function updateTabs(activeId) {
+        document.getElementById('tab-inbox').classList.remove('active');
+        document.getElementById('tab-compose').classList.remove('active');
+        document.getElementById(activeId).classList.add('active');
+    }
+</script>
+</body>
+</html>
