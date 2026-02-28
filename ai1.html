@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASAS AI Innovations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;400;900&family=JetBrains+Mono:wght@300&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent-primary: #00f2ff;
+            --accent-secondary: #7000ff;
+            --bg-deep: #020205;
+        }
+
+        body {
+            background: var(--bg-deep);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(112, 0, 255, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(0, 242, 255, 0.1) 0px, transparent 50%);
+            color: #fff;
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* 2026 Hyper-Glass Effect */
+        .ultimate-card {
+            background: rgba(255, 255, 255, 0.01);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 40px;
+            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .ultimate-card:hover {
+            background: rgba(255, 255, 255, 0.03);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 80px -20px rgba(0, 242, 255, 0.2);
+            transform: scale(1.01);
+        }
+
+        /* Kinetic Text */
+        .hero-title {
+            font-weight: 900;
+            letter-spacing: -0.05em;
+            background: linear-gradient(180deg, #fff 30%, rgba(255,255,255,0.2) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 0.85;
+        }
+
+        /* Ultra-Modern Button */
+        .btn-nexus {
+            background: #fff;
+            color: #000;
+            padding: 1.25rem 2.5rem;
+            border-radius: 100px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.4s;
+            cursor: pointer;
+            border: none;
+            text-decoration: none;
+        }
+
+        .btn-nexus:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 20px 40px rgba(255,255,255,0.2);
+            letter-spacing: 1px;
+        }
+
+        /* Animated Grid Background */
+        .grid-overlay {
+            position: fixed;
+            inset: 0;
+            background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .glow-sphere {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: var(--accent-secondary);
+            filter: blur(150px);
+            border-radius: 50%;
+            opacity: 0.2;
+            z-index: -1;
+            animation: move 20s infinite alternate;
+        }
+
+        @keyframes move {
+            from { transform: translate(-10%, -10%); }
+            to { transform: translate(110%, 110%); }
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center p-6">
+
+    <div class="grid-overlay"></div>
+    <div class="glow-sphere"></div>
+
+    <nav class="w-full max-w-6xl flex justify-between items-center mb-20 py-8">
+        <div class="text-2xl font-black tracking-tighter">ASAS AI</div>
+        <div class="hidden md:flex gap-10 font-mono text-xs tracking-widest opacity-50">
+            <a href="index.html">MAINPAGE</a>
+            <a href="office\login.html">OFFICE</a>
+        </div>
+        <a href="#disc" class="px-6 py-2 border border-white/20 rounded-full text-sm hover:bg-white hover:text-black transition-all">
+            Learn More
+        </a>
+    </nav>
+
+<section id="dis" class="max-w-5xl w-full text-center mb-24">
+        <h1 class="hero-title text-7xl md:text-[140px] mb-8">
+            YOUR PRIVATE <br> AI COMPANIAN
+        </h1>
+        <p class="text-xl md:text-2xl text-gray-400 font-light max-w-2xl mx-auto mb-12">
+            The ASAS's first 100% Autonomous Intelligence platform. 
+            No detailed prompts. Just results.
+        </p>
+        <a href="#disc" class="btn-nexus">
+            Get Started 
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 12h14m-7-7 7 7-7 7"/></svg>
+        </a>
+    </section>
+
+<div id="disc" class="max-w-7xl w-full grid grid-cols-1 md:grid-cols-3 gap-8">
+        
+        <div class="ultimate-card md:col-span-2 p-12 flex flex-col justify-between min-h-[400px]">
+            <div>
+                <h2 class="text-4xl font-bold mb-4">ASAS Hyper-AI</h2>
+                <p class="text-gray-400 text-lg">Our 2026-level AI Chatbots that can complete your task within a seconds.</p>
+            </div>
+            <div class="flex gap-4">
+                <a href="https://example.com" class="px-8 py-4 bg-white/5 rounded-2xl hover:bg-white/10 transition-all border border-white/10">Explore Research</a>
+                <a href="ai.html" class="px-8 py-4 bg-purple-600 rounded-2xl hover:bg-purple-500 transition-all">Chat Now</a>
+            </div>
+        </div>
+
+        <div class="ultimate-card p-12 flex flex-col justify-center text-center">
+            <div class="mb-8">
+                <div class="text-6xl font-black text-cyan-400">99.9%</div>
+                <div class="text-xs font-mono tracking-widest opacity-50 uppercase mt-2">Accuracy Rate</div>
+            </div>
+        </div>
+
+        <div class="ultimate-card p-8 group">
+            <div class="h-12 w-12 rounded-full bg-cyan-500/20 mb-6 flex items-center justify-center group-hover:bg-cyan-500 transition-all">
+                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            </div>
+            <h3 class="text-xl font-bold mb-2">AI DocuSum</h3>
+            <p class="text-gray-500 text-sm mb-6">Transform your long document into a short summary within a seconds with our 2026 Intelligence</p>
+            <a href="doc.html" class="text-xs font-mono tracking-tighter opacity-80 hover:opacity-100">LAUNCH NOW →</a>
+        </div>
+
+        <div class="ultimate-card p-8 group">
+            <div class="h-12 w-12 rounded-full bg-purple-500/20 mb-6 flex items-center justify-center group-hover:bg-purple-500 transition-all">
+                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            </div>
+            <h3 class="text-xl font-bold mb-2">AI Quantum File Encrypter</h3>
+            <p class="text-gray-500 text-sm mb-6">Quantum-resistant encryption for your file contained sensitive data.</p>
+            <a href="quan.html" class="text-xs font-mono tracking-tighter opacity-80 hover:opacity-100">SECURE NOW →</a>
+        </div>
+
+        <div class="ultimate-card p-8 group">
+            <div class="h-12 w-12 rounded-full bg-pink-500/20 mb-6 flex items-center justify-center group-hover:bg-pink-500 transition-all">
+                <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
+            </div>
+            <h3 class="text-xl font-bold mb-2">AI Dictionary</h3>
+            <p class="text-gray-500 text-sm mb-6">Your private AI-based tool to learn new words quickly.</p>
+            <a href="dic.html" class="text-xs font-mono tracking-tighter opacity-80 hover:opacity-100">TRY NOW →</a>
+        </div>
+
+    </div>
+
+    <footer class="mt-40 mb-10 text-center opacity-30 text-xs font-mono tracking-[0.5em]">
+        ©2026 ASAS TECHNOLOGIES, INC. // VERSION 1.0.0 (BETA)
+    </footer>
+
+</body>
+</html>
