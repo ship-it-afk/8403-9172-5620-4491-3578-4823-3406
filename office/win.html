@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorial To Install ASAS Office On Windows 11 Machine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;400;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #6366f1;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .mesh-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 100%, hsla(339,49%,30%,1) 0, transparent 50%), 
+                radial-gradient(at 0% 100%, hsla(253,16%,7%,1) 0, transparent 50%);
+        }
+
+        .experience-container {
+            position: relative;
+            width: 95vw; 
+            aspect-ratio: 16 / 9; 
+            max-height: 90vh; 
+            max-width: calc(90vh * (16 / 9));
+            
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border);
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-radius: 40px;
+            padding: 2rem;
+            box-sizing: border-box;
+            box-shadow: 0 100px 200px rgba(0,0,0,0.8);
+        }
+
+        h1 {
+            font-weight: 900;
+            font-size: clamp(1.5rem, 5vh, 4rem);
+            margin: 0 0 2vh 0;
+            letter-spacing: -0.05em;
+            text-transform: uppercase;
+        }
+
+        .video-wrapper {
+            width: 100%;
+            flex: 1;
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .footer-ui {
+            width: 100%;
+            height: 15vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Container for the status to ensure center alignment */
+        #status-ui {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .progress-container {
+            width: 200px;
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background: var(--accent);
+            transition: width 0.3s ease-out;
+        }
+
+        .timer-text {
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            opacity: 0.5;
+            text-align: center; /* Centered the text */
+            width: 100%;
+        }
+
+        #skip-btn {
+            display: none;
+            background: #fff;
+            color: #000;
+            border: none;
+            padding: 1.2rem 3rem;
+            border-radius: 100px;
+            font-weight: 900;
+            cursor: pointer;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="mesh-bg"></div>
+
+<div class="experience-container">
+    <h1>Tutorial</h1>
+
+    <div class="video-wrapper">
+        <video id="v" autoplay muted playsinline loop>
+            <source src="tutor.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <div class="footer-ui">
+        <div id="status-ui">
+            <div class="progress-container">
+                <div id="progress-bar"></div>
+            </div>
+            <div class="timer-text">UNLOCKING IN <span id="count">18</span>S</div>
+        </div>
+        
+        <button id="skip-btn" onclick="location.href='https://drive.usercontent.google.com/download?id=1VzO96uZuUs2mgVkv8J7FkI-snzD6ItLf&export=download&authuser=0&confirm=t&uuid=7fe075d2-5ed3-4d9d-8f12-4e75a821fe18&at=APcXIO37qB8BPASSEH_T7jQiaEaR:1772337370857'">
+            Proceed To Download →
+        </button>
+    </div>
+</div>
+
+<script>
+    const totalTime = 18;
+    let timeLeft = totalTime;
+    
+    const countEl = document.getElementById('count');
+    const bar = document.getElementById('progress-bar');
+    const statusUi = document.getElementById('status-ui');
+    const btn = document.getElementById('skip-btn');
+
+    const itv = setInterval(() => {
+        timeLeft--;
+        
+        const displayTime = Math.max(0, timeLeft);
+        const progress = Math.min(100, ((totalTime - displayTime) / totalTime) * 100);
+
+        countEl.innerText = displayTime;
+        bar.style.width = progress + '%';
+
+        if (timeLeft <= 0) {
+            clearInterval(itv);
+            statusUi.style.display = 'none';
+            btn.style.display = 'block';
+        }
+    }, 1000);
+
+    document.addEventListener('click', () => { 
+        const v = document.getElementById('v');
+        if (v && v.paused) v.play();
+    }, {once: true});
+</script>
+
+</body>
+</html>
