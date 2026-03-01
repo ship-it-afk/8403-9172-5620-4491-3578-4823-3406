@@ -1,1 +1,135 @@
-404 Error - Pre-release
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select A OS</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #050505;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.1);
+            --win10-accent: linear-gradient(135deg, #0078d4 0%, #00bcf2 100%);
+            --win11-accent: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(79, 70, 229, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(0, 188, 242, 0.1) 0%, transparent 40%);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            margin-bottom: 3rem;
+            text-align: center;
+            background: linear-gradient(to bottom, #fff 40%, #a1a1a1 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .container {
+            display: flex;
+            gap: 2rem;
+            perspective: 1000px;
+        }
+
+        .os-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            padding: 3rem;
+            border-radius: 24px;
+            width: 280px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            position: relative;
+        }
+
+        .os-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .os-card h2 {
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            color: white;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-10 { background: var(--win10-accent); }
+        .btn-11 { background: var(--win11-accent); }
+
+        .btn:active { transform: scale(0.95); }
+
+        /* Modern subtle glow effect */
+        .os-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 24px;
+            opacity: 0;
+            transition: opacity 0.5s;
+            z-index: -1;
+            filter: blur(15px);
+        }
+
+        .card-10:hover::after { background: var(--win10-accent); opacity: 0.2; }
+        .card-11:hover::after { background: var(--win11-accent); opacity: 0.2; }
+
+    </style>
+</head>
+<body>
+
+    <h1>Choose your PC Operating System</h1>
+
+    <div class="container">
+        <div class="os-card card-10" onclick="location.href='win10.html'">
+            <h2>Windows 10</h2>
+            <button class="btn btn-10">Launch</button>
+        </div>
+
+        <div class="os-card card-11" onclick="location.href='win.html'">
+            <h2>Windows 11</h2>
+            <button class="btn btn-11">Launch</button>
+        </div>
+    </div>
+
+</body>
+</html>
