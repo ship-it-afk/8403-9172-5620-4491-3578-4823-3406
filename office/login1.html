@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<title>Login To ASAS Office Suites</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+
+
+<style>
+
+:root{
+
+  --bg1:#0b0f1a;
+
+  --bg2:#111827;
+
+  --card:#0f172a;
+
+  --accent:#3b82f6;
+
+  --accent2:#06b6d4;
+
+}
+
+
+
+*{box-sizing:border-box}
+
+
+
+body{
+
+  margin:0;
+
+  font-family:"Inter",sans-serif;
+
+  background: radial-gradient(circle at 20% 20%, #1f2937, #020617 60%);
+
+  color:white;
+
+  min-height:100vh;
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+  overflow:hidden;
+
+}
+
+
+
+/* animated background glow */
+
+body::before{
+
+  content:"";
+
+  position:fixed;
+
+  width:600px;
+
+  height:600px;
+
+  background:linear-gradient(45deg,var(--accent),var(--accent2));
+
+  filter:blur(140px);
+
+  opacity:.25;
+
+  animation:float 12s linear infinite;
+
+}
+
+
+
+@keyframes float{
+
+  0%{transform:translate(-20%,-10%)}
+
+  50%{transform:translate(40%,30%)}
+
+  100%{transform:translate(-20%,-10%)}
+
+}
+
+
+
+.wrapper{
+
+  width:380px;
+
+  position:relative;
+
+}
+
+
+
+.card{
+
+  backdrop-filter: blur(18px);
+
+  background:rgba(15,23,42,.75);
+
+  border:1px solid rgba(255,255,255,.08);
+
+  border-radius:20px;
+
+  padding:34px;
+
+  box-shadow:0 20px 60px rgba(0,0,0,.6);
+
+  transition:all .6s cubic-bezier(.4,0,.2,1);
+
+}
+
+
+
+h2{
+
+  margin:0 0 20px;
+
+  font-weight:700;
+
+  letter-spacing:.5px;
+
+  text-align:center;
+
+}
+
+
+
+.field{
+
+  position:relative;
+
+  margin-bottom:16px;
+
+}
+
+
+
+input, select{
+
+  width:100%;
+
+  padding:14px 14px;
+
+  border-radius:12px;
+
+  border:1px solid rgba(255,255,255,.12);
+
+  background:rgba(2,6,23,.6);
+
+  color:white;
+
+  outline:none;
+
+  transition:.3s;
+
+}
+
+
+
+input:focus, select:focus{
+
+  border-color:var(--accent);
+
+  box-shadow:0 0 0 3px rgba(59,130,246,.25);
+
+  transform:translateY(-1px);
+
+}
+
+
+
+button{
+
+  width:100%;
+
+  padding:14px;
+
+  border-radius:14px;
+
+  border:none;
+
+  font-weight:600;
+
+  cursor:pointer;
+
+  transition:.35s;
+
+  position:relative;
+
+  overflow:hidden;
+
+}
+
+
+
+button::after{
+
+  content:"";
+
+  position:absolute;
+
+  inset:0;
+
+  background:linear-gradient(120deg,transparent,rgba(255,255,255,.35),transparent);
+
+  transform:translateX(-100%);
+
+}
+
+
+
+button:hover::after{
+
+  animation:shine .9s;
+
+}
+
+
+
+@keyframes shine{
+
+  to{transform:translateX(100%)}
+
+}
+
+
+
+.primary{
+
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+
+  color:white;
+
+  box-shadow:0 10px 25px rgba(59,130,246,.4);
+
+}
+
+
+
+.primary:hover{
+
+  transform:translateY(-2px) scale(1.01);
+
+}
+
+
+
+.secondary{
+
+  background:transparent;
+
+  border:1px solid rgba(255,255,255,.18);
+
+  color:white;
+
+  margin-top:10px;
+
+}
+
+
+
+.secondary:hover{
+
+  background:rgba(255,255,255,.08);
+
+}
+
+
+
+.subtotal{
+
+  text-align:center;
+
+  margin:12px 0 4px;
+
+  font-weight:600;
+
+  opacity:.9;
+
+  transition:.3s;
+
+}
+
+
+
+.fade{
+
+  animation:fade .5s ease;
+
+}
+
+
+
+@keyframes fade{
+
+  from{opacity:0; transform:translateY(10px)}
+
+  to{opacity:1; transform:translateY(0)}
+
+}
+
+
+
+.successBox{
+
+  text-align:center;
+
+  animation:fade .6s ease;
+
+}
+
+
+
+.badge{
+
+  display:inline-block;
+
+  padding:6px 12px;
+
+  border-radius:999px;
+
+  background:rgba(34,197,94,.15);
+
+  color:#4ade80;
+
+  font-size:13px;
+
+  margin-bottom:10px;
+
+}
+
+
+
+</style>
+
+</head>
+
+
+
+<body>
+
+
+
+<div class="wrapper">
+
+<div class="card" id="card">
+
+
+
+<!-- LOGIN -->
+
+<div id="loginBox" class="fade">
+
+<h2>Welcome Back</h2>
+
+
+
+<div class="field"><input id="lname" placeholder="Name"></div>
+
+<div class="field"><input id="lemail" placeholder="Email"></div>
+
+<div class="field"><input id="lpass" type="password" placeholder="Password"></div>
+
+
+
+<button class="primary" onclick="login()">Sign In</button>
+
+<button class="secondary" onclick="showSignup()">Create Account</button>
+
+</div>
+
+
+
+<!-- SIGNUP -->
+
+<div id="signupBox" style="display:none">
+
+<h2>Create Account</h2>
+
+
+
+<div class="field"><input id="sname" placeholder="Name"></div>
+
+<div class="field"><input id="semail" placeholder="Email"></div>
+
+<div class="field"><input id="spass" type="password" placeholder="Password"></div>
+
+
+
+<div class="field">
+
+<select id="plan" onchange="updateSubtotal()">
+
+<option value="">Select Plan</option>
+
+<option value="personal">ASAS Personal — RM599</option>
+
+<option value="business">ASAS Business — RM1099</option>
+
+</select>
+
+</div>
+
+
+
+<div class="subtotal" id="subtotal">Subtotal: RM0</div>
+
+
+
+<button class="primary" onclick="signup()">Create Account</button>
+
+<button class="secondary" onclick="showLogin()">Back</button>
+
+</div>
+
+
+
+</div>
+
+</div>
+
+
+
+<script>
+
+const API = "https://script.google.com/macros/s/AKfycbxbDgt5i1-aK5Ng0opZdvGO7Gs_BnboNi3ITH5LA-sx2ARhbTjpwDhvHtn8PN9dtd7s/exec";
+
+
+
+function switchBox(from,to){
+
+  from.style.display="none";
+
+  to.style.display="block";
+
+  to.classList.remove("fade");
+
+  void to.offsetWidth;
+
+  to.classList.add("fade");
+
+}
+
+
+
+function showSignup(){ switchBox(loginBox, signupBox); }
+
+function showLogin(){ switchBox(signupBox, loginBox); }
+
+
+
+function updateSubtotal(){
+
+  subtotal.style.transform="scale(1.05)";
+
+  setTimeout(()=>subtotal.style.transform="scale(1)",200);
+
+  if(plan.value==="personal") subtotal.innerText="Subtotal: RM599";
+
+  else if(plan.value==="business") subtotal.innerText="Subtotal: RM1099";
+
+  else subtotal.innerText="Subtotal: RM0";
+
+}
+
+
+
+async function login(){
+
+  const res = await fetch(API,{method:"POST",body:JSON.stringify({
+
+    action:"login",
+
+    name:lname.value,
+
+    email:lemail.value,
+
+    password:lpass.value
+
+  })});
+
+
+
+  const data = await res.json();
+
+  if(data.status!=="ok") return alert("Invalid login");
+
+
+
+  const p=data.products.toUpperCase();
+
+  const hasN=p.includes("N"), hasW=p.includes("W"), hasP=p.includes("P"), hasS=p.includes("S");
+
+
+
+  if(hasN&&hasW&&hasP&&hasS) location.href="standard.html";
+
+  else if(!hasN&&hasW&&hasP&&hasS) location.href="personal.html";
+
+  else alert("No matching product rule");
+
+}
+
+
+
+async function signup(){
+
+  let products="";
+
+  if(plan.value==="personal") products="W,P,S";
+
+  if(plan.value==="business") products="N,W,P,S";
+
+  if(!products) return alert("Select a plan");
+
+
+
+  const res = await fetch(API,{method:"POST",body:JSON.stringify({
+
+    action:"signup",
+
+    name:sname.value,
+
+    email:semail.value,
+
+    password:spass.value,
+
+    products
+
+  })});
+
+
+
+  const data = await res.json();
+
+
+
+  if(data.status==="email_exists"){
+
+    alert("Email already registered");
+
+    return;
+
+  }
+
+
+
+  if(data.status==="created"){
+
+    window.open("index.html","_blank");
+
+    signupBox.innerHTML=`
+
+      <div class='successBox'>
+
+        <div class='badge'>SUCCESS</div>
+
+        <h2>Account Created</h2>
+
+        <button class='primary' onclick='location.reload()'>Sign In</button>
+
+      </div>`;
+
+  }
+
+}
+
+</script>
+
+
+
+</body>
+
+</html>

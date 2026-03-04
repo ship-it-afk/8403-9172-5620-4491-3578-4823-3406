@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Continue With Google</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+/* ---------- 2026 Ultra-Modern UI ---------- */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;500;800&display=swap');
+
+:root {
+    --primary: #6366f1;
+    --accent: #a855f7;
+    --success: #22c55e;
+    --bg-dark: #09090b;
+    --card-bg: rgba(24, 24, 27, 0.8);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: var(--bg-dark);
+    color: #fff;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Animated Mesh Background */
+body::before {
+    content: "";
+    position: absolute;
+    width: 140%;
+    height: 140%;
+    background: radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.15) 0%, transparent 40%);
+    z-index: -1;
+    animation: mesh-move 20s infinite alternate ease-in-out;
+}
+
+@keyframes mesh-move {
+    0% { transform: translate(-10%, -10%); }
+    100% { transform: translate(10%, 10%); }
+}
+
+.card {
+    position: relative;
+    background: var(--card-bg);
+    backdrop-filter: blur(32px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 28px;
+    padding: 50px 40px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+h2 {
+    font-weight: 800;
+    font-size: 2.2rem;
+    letter-spacing: -0.03em;
+    margin-bottom: 8px;
+    background: linear-gradient(to bottom right, #fff 30%, rgba(255,255,255,0.5));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+    color: #a1a1aa;
+    font-size: 0.95rem;
+    margin-bottom: 40px;
+}
+
+.button-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+button {
+    position: relative;
+    padding: 16px 24px;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 600;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.google {
+    background: #fff;
+    color: #000;
+}
+
+.google:hover {
+    background: #f4f4f5;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px -5px rgba(255,255,255,0.2);
+}
+
+.create {
+    background: rgba(255,255,255,0.05);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.create:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.3);
+}
+
+#extra {
+    margin-top: 30px;
+    padding-top: 30px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.plan-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.plan-btn {
+    padding: 12px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: white;
+}
+
+/* Status Indicator */
+.loader {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 0.8s linear infinite;
+    display: none;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+@media(max-width:480px){
+    .card { border-radius: 0; height: 100vh; max-width: none; border: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Secure Access</h2>
+    <p class="subtitle">Select your entry method to continue</p>
+    
+    <div class="button-stack">
+        <button class="google" id="signinBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12-4.53z" fill="#EA4335"/></svg>
+            Sign In with Google
+        </button>
+        <button class="create" id="signupBtn">Create Account with Google</button>
+    </div>
+
+    <div id="extra"></div>
+</div>
+
+<script>
+/* Logic preserved exactly as requested.
+   UI triggers and element creation updated for the new styles.
+*/
+const WEB_APP = "https://script.google.com/macros/s/AKfycbxbDgt5i1-aK5Ng0opZdvGO7Gs_BnboNi3ITH5LA-sx2ARhbTjpwDhvHtn8PN9dtd7s/exec";
+const CLIENT_ID = "834767369630-oilutru96g8h51sjhjsdu4m7q34bv4dl.apps.googleusercontent.com";
+
+let googleUser = null;
+let selectedProducts = null;
+let currentMode = null;
+let tokenClient;
+
+document.getElementById("signinBtn").addEventListener("click",()=>googleLogin("login"));
+document.getElementById("signupBtn").addEventListener("click",()=>googleLogin("signup"));
+
+function googleLogin(mode){
+    currentMode = mode;
+    tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
+        scope: "openid email profile",
+        callback: handleTokenResponse
+    });
+    tokenClient.requestAccessToken({prompt:"consent"});
+}
+
+function handleTokenResponse(resp){
+    fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${resp.access_token}`)
+    .then(r=>r.json())
+    .then(user=>{
+        googleUser = {name:user.name,email:user.email};
+        if(currentMode==="login") loginUser();
+        else choosePlan();
+    }).catch(err=>alert("Google Login Failed: "+err));
+}
+
+function loginUser(){
+    fetch(WEB_APP,{
+        method:"POST",
+        body: JSON.stringify({action:"login",name:googleUser.name,email:googleUser.email,password:""})
+    })
+    .then(res=>res.json())
+    .then(res=>{
+        if(res.status==="ok"){
+            if(res.products==="N,W,P,S") window.location="standard.html";
+            else if(res.products==="W,P,S") window.location="personal.html";
+            else alert("Unknown product type.");
+        } else alert("Invalid Login");
+    }).catch(err=>alert("Login error: "+err));
+}
+
+function choosePlan(){
+    document.getElementById("extra").innerHTML=`
+        <p class="subtitle" style="margin-bottom:15px">Select your configuration</p>
+        <div class="plan-grid">
+            <button class="plan-btn" onclick="selectPlan('N,W,P,S')">NWPS Tier</button>
+            <button class="plan-btn" onclick="selectPlan('W,P,S')">WPS Tier</button>
+        </div>`;
+}
+
+function selectPlan(plan){
+    selectedProducts = plan;
+    window.open("pay.html","_blank");
+    document.getElementById("extra").innerHTML=`
+        <div style="margin-top:20px">
+            <button class="plan-btn" style="width:100%" onclick="createAccount()">Complete Registration</button>
+        </div>`;
+}
+
+function createAccount(){
+    fetch(WEB_APP,{
+        method:"POST",
+        body: JSON.stringify({action:"signup",name:googleUser.name,email:googleUser.email,password:"",products:selectedProducts})
+    })
+    .then(res=>res.json())
+    .then(res=>{
+        if(res.status==="created"){alert("Account Successfully Created");location.reload();}
+        else if(res.status==="email_exists"){alert("Email already registered");}
+        else alert("Error: "+JSON.stringify(res));
+    }).catch(err=>alert("Signup error: "+err));
+}
+</script>
+
+</body>
+</html>
