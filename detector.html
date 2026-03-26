@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Device Detector</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+            min-width: 300px;
+        }
+        #result {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #007bff;
+            margin-top: 10px;
+        }
+        .details {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>You are using a:</h2>
+        <div id="result">Detecting...</div>
+        <div class="details" id="debug"></div>
+    </div>
+
+    <script>
+        function detectDevice() {
+            const ua = navigator.userAgent;
+            const width = window.innerWidth;
+            let device = "Desktop/Laptop";
+
+            // 1. Modern API: User-Agent Client Hints (Chrome, Edge, Opera)
+            if (navigator.userAgentData) {
+                if (navigator.userAgentData.mobile) {
+                    // It's mobile, but is it a tablet or phone?
+                    device = width > 768 ? "Tablet" : "Phone";
+                } else {
+                    device = "Desktop/Laptop";
+                }
+            } 
+            // 2. Legacy Fallback: Regex for Safari and Firefox
+            else {
+                const isMobileUA = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+                const isTabletUA = /Tablet|iPad/i.test(ua) || (isMobileUA && width > 768);
+
+                if (isTabletUA) {
+                    device = "Tablet";
+                } else if (isMobileUA) {
+                    device = "Phone";
+                }
+            }
+
+            // 3. Precision check for iPads/Tablets pretending to be Desktops
+            // (Common in iPadOS where they report as 'Macintosh')
+            const hasTouch = navigator.maxTouchPoints > 0;
+            if (device === "Desktop/Laptop" && hasTouch && width <= 1366) {
+                device = "Tablet (Touch Laptop?)";
+            }
+
+            // Display results
+            document.getElementById('result').innerText = device;
+            document.getElementById('debug').innerText = `Screen Width: ${width}px | Touch: ${hasTouch ? 'Yes' : 'No'}`;
+        }
+
+        // Run on load and on resize
+        window.addEventListener('load', detectDevice);
+        window.addEventListener('resize', detectDevice);
+    </script>
+</body>
+</html>
