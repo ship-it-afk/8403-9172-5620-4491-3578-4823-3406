@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ultimate Forensic PDF Meta-Analyzer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; padding: 40px; color: #333; }
+        .container { max-width: 950px; margin: auto; }
+        #drop-zone {
+            border: 3px dashed #3498db; border-radius: 15px; padding: 50px;
+            text-align: center; background: #fff; transition: all 0.3s ease;
+            cursor: pointer; margin-bottom: 20px;
+        }
+        #drop-zone.hover { background: #e1f5fe; border-color: #2980b9; transform: scale(1.01); }
+        .info-card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); display: none; }
+        h2 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 8px; margin-top: 35px; font-size: 1.4rem; }
+        h2:first-child { margin-top: 0; }
+        .meta-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0; align-items: center; }
+        .label { font-weight: bold; color: #7f8c8d; font-size: 0.9rem; }
+        .value { color: #2c3e50; word-break: break-all; text-align: right; max-width: 65%; font-family: 'Consolas', monospace; font-size: 0.95rem; }
+        .expert-tag { font-size: 0.7rem; background: #c0392b; color: white; padding: 2px 6px; border-radius: 4px; margin-right: 5px; vertical-align: middle; }
+        pre { background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 0.8rem; max-height: 200px; }
+        .status { color: #27ae60; font-weight: bold; margin-bottom: 10px; display: block; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Ultimate Forensic PDF Meta-Analyzer</h1>
+    
+    <div id="drop-zone">
+        <p><strong>Drop PDF for Deep Forensic Inspection</strong></p>
+        <p>SHA-256, Object Audit, Integrity & Permissions</p>
+        <input type="file" id="file-input" accept="application/pdf" style="display:none">
+    </div>
+
+    <div id="result-card" class="info-card">
+        <span id="loading-status" class="status"></span>
+        
+        <h2>Identity & Integrity</h2>
+        <div id="identity-content"></div>
+
+        <h2>Structural Integrity & Flags</h2>
+        <div id="structure-content"></div>
+
+        <h2>Document Permissions</h2>
+        <div id="permissions-content"></div>
+        
+        <h2>Content Statistics (Deep Scan)</h2>
+        <div id="stats-content"></div>
+
+        <h2>Resource & Object Audit</h2>
+        <div id="res-content"></div>
+
+        <h2>Raw Metadata Stream</h2>
+        <pre id="xmp-content"></pre>
+    </div>
+</div>
+
+<script>
+    const pdfjsLib = window['pdfjs-dist/build/pdf'];
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const resultCard = document.getElementById('result-card');
+    const status = document.getElementById('loading-status');
+
+    dropZone.onclick = () => fileInput.click();
+    dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('hover'); };
+    dropZone.ondragleave = () => dropZone.classList.remove('hover');
+    dropZone.ondrop = (e) => { e.preventDefault(); dropZone.classList.remove('hover'); if (e.dataTransfer.files[0]) processPDF(e.dataTransfer.files[0]); };
+    fileInput.onchange = (e) => { if (e.target.files[0]) processPDF(e.target.files[0]); };
+
+    function formatPDFDate(pdfDate) {
+        if (!pdfDate || typeof pdfDate !== 'string') return "N/A";
+        let dateStr = pdfDate.replace(/^D:/, '');
+        let year = dateStr.substring(0, 4);
+        let month = dateStr.substring(4, 6);
+        let day = dateStr.substring(6, 8);
+        let hour = dateStr.substring(8, 10);
+        let min = dateStr.substring(10, 12);
+        let sec = dateStr.substring(12, 14);
+        return `${year}-${month}-${day} ${hour}:${min}:${sec}`;
+    }
+
+    async function computeSHA256(buffer) {
+        const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+        return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function processPDF(file) {
+        resultCard.style.display = 'block';
+        status.textContent = "Extracting forensic data streams...";
+        
+        const arrayBuffer = await file.arrayBuffer();
+        const sha256 = await computeSHA256(arrayBuffer);
+        const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+        const meta = await pdf.getMetadata();
+        
+        let charCount = 0, wordCount = 0, lineCount = 0, whitespaceCount = 0;
+        const fontSet = new Set();
+        let totalJpegCount = 0;
+        let totalImgCount = 0;
+
+        for (let i = 1; i <= pdf.numPages; i++) {
+            status.textContent = `Scanning Page ${i} of ${pdf.numPages}...`;
+            const p = await pdf.getPage(i);
+            const tc = await p.getTextContent();
+            tc.items.forEach(item => {
+                charCount += item.str.length;
+                wordCount += item.str.split(/\s+/).filter(s => s.length > 0).length;
+                lineCount += (item.hasEOL ? 1 : 0);
+                whitespaceCount += (item.str.split(" ").length - 1);
+            });
+
+            const ops = await p.getOperatorList();
+            ops.fnArray.forEach((fn, idx) => {
+                if (fn === pdfjsLib.OPS.setFont) fontSet.add(ops.argsArray[idx][0]);
+                if (fn === pdfjsLib.OPS.paintJpegXObject) totalJpegCount++;
+                if (fn === pdfjsLib.OPS.paintImageXObject) totalImgCount++;
+            });
+        }
+
+        const page1 = await pdf.getPage(1);
+        const annotations = await page1.getAnnotations();
+        const operatorList = await page1.getOperatorList();
+
+        displayExpertInfo(file, pdf, meta, page1, sha256, charCount, wordCount, lineCount, whitespaceCount, annotations, operatorList, fontSet, totalJpegCount, totalImgCount);
+        status.textContent = "Deep Forensic Scan Complete.";
+    }
+
+    async function displayExpertInfo(file, pdf, meta, page, sha, chars, words, lines, spaces, annots, ops, fonts, jpegs, imgs) {
+        const info = meta.info;
+        const perms = await pdf.getPermissions();
+        
+        const data1 = [
+            { label: "File Name", value: file.name, expert: false },
+            { label: "Author", value: info.Author || "Not Specified", expert: false },
+            { label: "Description (Subject)", value: info.Subject || "No Description", expert: false },
+            { label: "File Size", value: (file.size / 1024).toFixed(2) + " KB", expert: false },
+            { label: "Last Accessed", value: new Date().toLocaleString(), expert: true },
+            { label: "SHA-256 Fingerprint", value: sha, expert: true },
+            { label: "MIME Type", value: "application/pdf", expert: true }
+        ];
+
+        const data2 = [
+            { label: "PDF Producer", value: info.Producer || "Unknown", expert: true },
+            { label: "PDF Version", value: info.PDFFormatVersion || "1.x", expert: false },
+            { label: "Total Page Count", value: pdf.numPages, expert: false },
+            { label: "Fast Web View Supported", value: pdf.isLinearized ? "Yes" : "No", expert: true },
+            { label: "Created Date", value: formatPDFDate(info.CreationDate), expert: false },
+            { label: "Last Modified Date", value: formatPDFDate(info.ModDate), expert: false },
+            { label: "Encrypted Stream", value: pdf.isEncrypted ? "Yes" : "No", expert: true }
+        ];
+
+        const dataPerms = [
+            { label: "Printing", value: !perms || perms.includes(pdfjsLib.PermissionFlag.PRINT) ? "Allowed" : "Restricted", expert: true },
+            { label: "Content Copying", value: !perms || perms.includes(pdfjsLib.PermissionFlag.COPY) ? "Allowed" : "Restricted", expert: true },
+            { label: "Document Assembly", value: !perms || perms.includes(pdfjsLib.PermissionFlag.MODIFY_CONTENTS) ? "Allowed" : "Restricted", expert: true },
+            { label: "Form Filling", value: !perms || perms.includes(pdfjsLib.PermissionFlag.FILL_INTERACTIVE_FORMS) ? "Allowed" : "Restricted", expert: true }
+        ];
+
+        const data3 = [
+            { label: "Total Characters", value: chars.toLocaleString(), expert: true },
+            { label: "Total Words", value: words.toLocaleString(), expert: true },
+            { label: "Estimated Lines", value: lines.toLocaleString(), expert: true },
+            { label: "Avg Char/Word Ratio", value: (chars / words).toFixed(2), expert: true }
+        ];
+
+        const data4 = [
+            { label: "Used Fonts", value: Array.from(fonts).join(", ") || "None Detected", expert: true },
+            { label: "Total JPEG Objects", value: jpegs, expert: true },
+            { label: "Total Image Objects", value: imgs, expert: true },
+            { label: "MediaBox (W x H)", value: `${page.view[2].toFixed(0)} x ${page.view[3].toFixed(0)} pts`, expert: true }
+        ];
+
+        const render = (id, data) => {
+            document.getElementById(id).innerHTML = data.map(item => `
+                <div class="meta-row">
+                    <span class="label">${item.expert ? '<span class="expert-tag">EXPERT</span>' : ''}${item.label}</span>
+                    <span class="value">${item.value}</span>
+                </div>`).join('');
+        };
+
+        render('identity-content', data1);
+        render('structure-content', data2);
+        render('permissions-content', dataPerms);
+        render('stats-content', data3);
+        render('res-content', data4);
+        document.getElementById('xmp-content').textContent = meta.metadata ? meta.metadata.getRaw() : "No XMP stream found.";
+    }
+</script>
+</body>
+</html>

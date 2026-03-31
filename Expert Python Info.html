@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ultimate Forensic Python Meta-Analyzer</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; padding: 40px; color: #333; }
+        .container { max-width: 950px; margin: auto; }
+        #drop-zone {
+            border: 3px dashed #3498db; border-radius: 15px; padding: 50px;
+            text-align: center; background: #fff; transition: all 0.3s ease;
+            cursor: pointer; margin-bottom: 20px;
+        }
+        #drop-zone.hover { background: #e1f5fe; border-color: #2980b9; transform: scale(1.01); }
+        .info-card { background: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); display: none; }
+        h2 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 8px; margin-top: 35px; font-size: 1.4rem; }
+        h2:first-child { margin-top: 0; }
+        .meta-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f0f0f0; align-items: center; }
+        .label { font-weight: bold; color: #7f8c8d; font-size: 0.9rem; }
+        .value { color: #2c3e50; word-break: break-all; text-align: right; max-width: 65%; font-family: 'Consolas', monospace; font-size: 0.95rem; }
+        .expert-tag { font-size: 0.7rem; background: #c0392b; color: white; padding: 2px 6px; border-radius: 4px; margin-right: 5px; vertical-align: middle; }
+        pre { background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 0.8rem; max-height: 250px; }
+        .status { color: #27ae60; font-weight: bold; margin-bottom: 10px; display: block; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Ultimate Forensic Python Meta-Analyzer</h1>
+    
+    <div id="drop-zone">
+        <p><strong>Drop Python (.py) File for Deep Forensic Inspection</strong></p>
+        <p>SHA-256, Library Dependencies, & Syntax Audit</p>
+        <input type="file" id="file-input" accept=".py" style="display:none">
+    </div>
+
+    <div id="result-card" class="info-card">
+        <span id="loading-status" class="status"></span>
+        
+        <h2>Identity & Integrity</h2>
+        <div id="identity-content"></div>
+
+        <h2>Structural Syntax & Flags</h2>
+        <div id="structure-content"></div>
+
+        <h2>Execution Permissions & Security</h2>
+        <div id="permissions-content"></div>
+        
+        <h2>Content Statistics (Deep Scan)</h2>
+        <div id="stats-content"></div>
+
+        <h2>Dependency & Library Audit</h2>
+        <div id="res-content"></div>
+
+        <h2>Raw Source Preview</h2>
+        <pre id="xmp-content"></pre>
+    </div>
+</div>
+
+<script>
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const resultCard = document.getElementById('result-card');
+    const status = document.getElementById('loading-status');
+
+    dropZone.onclick = () => fileInput.click();
+    dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('hover'); };
+    dropZone.ondragleave = () => dropZone.classList.remove('hover');
+    dropZone.ondrop = (e) => { e.preventDefault(); dropZone.classList.remove('hover'); if (e.dataTransfer.files[0]) processPython(e.dataTransfer.files[0]); };
+    fileInput.onchange = (e) => { if (e.target.files[0]) processPython(e.target.files[0]); };
+
+    async function computeSHA256(buffer) {
+        const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+        return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function processPython(file) {
+        resultCard.style.display = 'block';
+        status.textContent = "Performing static code analysis and hashing...";
+        
+        const text = await file.text();
+        const arrayBuffer = await file.arrayBuffer();
+        const sha256 = await computeSHA256(arrayBuffer);
+        
+        // Deep Scan Logic for Python
+        const lines = text.split('\n');
+        const imports = lines.filter(l => l.trim().startsWith('import ') || l.trim().startsWith('from ')).map(l => l.trim());
+        const functions = lines.filter(l => l.trim().startsWith('def ')).length;
+        const classes = lines.filter(l => l.trim().startsWith('class ')).length;
+        const hasEval = text.includes('eval(') || text.includes('exec(');
+        const hasSubprocess = text.includes('subprocess') || text.includes('os.system');
+
+        displayPythonInfo(file, sha256, text, imports, functions, classes, lines.length, hasEval, hasSubprocess);
+        status.textContent = "Static Forensic Analysis Complete.";
+    }
+
+    function displayPythonInfo(file, sha, rawText, imports, funcs, classes, lineCount, hasEval, hasSubprocess) {
+        const data1 = [
+            { label: "File Name", value: file.name, expert: false },
+            { label: "File Size", value: (file.size / 1024).toFixed(2) + " KB", expert: false },
+            { label: "Last Accessed", value: new Date().toLocaleString(), expert: true },
+            { label: "SHA-256 Fingerprint", value: sha, expert: true },
+            { label: "Encoding", value: "UTF-8 / Plaintext", expert: true }
+        ];
+
+        const data2 = [
+            { label: "Defined Functions", value: funcs, expert: false },
+            { label: "Defined Classes", value: classes, expert: false },
+            { label: "Docstrings Detected", value: (rawText.match(/"""/g) || []).length / 2, expert: true },
+            { label: "Shebang Header", value: rawText.startsWith('#!') ? "Yes" : "None", expert: true },
+            { label: "Python Version Hint", value: rawText.includes('print(') ? "Python 3.x" : "Ambiguous", expert: true }
+        ];
+
+        const dataPerms = [
+            { label: "High-Risk Calls (eval/exec)", value: hasEval ? "DETECTED" : "None", expert: true },
+            { label: "OS Level Access", value: hasSubprocess ? "Yes (Subprocess/OS)" : "None", expert: true },
+            { label: "Network Potential", value: rawText.includes('requests') || rawText.includes('socket') ? "Yes" : "No", expert: true }
+        ];
+
+        const data3 = [
+            { label: "Total Lines (LOC)", value: lineCount, expert: true },
+            { label: "Comment Count (#)", value: (rawText.match(/#/g) || []).length, expert: true },
+            { label: "Average Line Length", value: (rawText.length / lineCount).toFixed(1) + " chars", expert: true },
+            { label: "Created Date", value: new Date(file.lastModified).toLocaleString(), expert: false }
+        ];
+
+        const data4 = [
+            { label: "Imported Modules", value: imports.length, expert: true },
+            { label: "External Dependencies", value: imports.length > 0 ? "Check requirements.txt" : "None", expert: true }
+        ];
+
+        const render = (id, data) => {
+            document.getElementById(id).innerHTML = data.map(item => `
+                <div class="meta-row">
+                    <span class="label">${item.expert ? '<span class="expert-tag">EXPERT</span>' : ''}${item.label}</span>
+                    <span class="value">${item.value}</span>
+                </div>`).join('');
+        };
+
+        render('identity-content', data1);
+        render('structure-content', data2);
+        render('permissions-content', dataPerms);
+        render('stats-content', data3);
+        render('res-content', data4);
+
+        document.getElementById('xmp-content').textContent = rawText.substring(0, 5000) + (rawText.length > 5000 ? "\n... [Truncated]" : "");
+    }
+</script>
+</body>
+</html>
