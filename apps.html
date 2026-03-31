@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASAS Technologies | Ecosystem</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Light Mode Variables */
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --text-main: #1d1d1f;
+            --accent: #0071e3;
+            --card-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                /* Dark Mode Variables */
+                --bg-gradient: linear-gradient(135deg, #0f172a 0%, #020617 100%);
+                --glass-bg: rgba(30, 41, 59, 0.7);
+                --glass-border: rgba(255, 255, 255, 0.1);
+                --text-main: #f8fafc;
+                --accent: #38bdf8;
+                --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            }
+        }
+
+        * { box-sizing: border-box; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-main);
+            margin: 0;
+            padding: 60px 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 10px;
+        }
+
+        /* The Bento Grid */
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        /* Glassmorphism Card */
+        .app-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 30px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .app-card:hover {
+            transform: scale(1.03);
+            border-color: var(--accent);
+        }
+
+        .app-icon {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.1));
+        }
+
+        .app-name {
+            font-weight: 600;
+            font-size: 1.25rem;
+            margin-bottom: 8px;
+        }
+
+        .app-desc {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Dynamic Buttons */
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 12px;
+            text-decoration: none;
+            text-align: center;
+            font-weight: 500;
+            font-size: 0.9rem;
+            background: var(--text-main);
+            color: var(--glass-bg); /* Inverse of text */
+        }
+
+        .btn:hover {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 0 20px var(--accent);
+        }
+
+        /* Tag for organization */
+        .tag {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: var(--accent);
+            color: white;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>ASAS Technologies</h1>
+        <p>Essentials web-applications of ASAS. Adsless, free and premium</p>
+    </div>
+
+    <div class="app-grid" id="container">
+        </div>
+
+    <script>
+        // EASY TO EDIT SECTION
+        // Add, delete, or modify objects here.
+        const appList = [
+            { name: "Windows 11 Repair & Tips", icon: "田", desc: "An easy use W11 repair and tech tips.", url: "https://ship-it-afk.github.io/win11fix/", tag: "TUTORIAL" },
+            { name: "Android Repair & Tips", icon: "A", desc: "An easy use Android repair and tech tips.", url: "https://ship-it-afk.github.io/win11fix/androidfix.html", tag: "TUTORIAL" },
+            { name: "Secure Vault", icon: "🔐", desc: "Post-quantum + 99 layers file encryption.", url: "https://ship-it-afk.github.io/8403-9172-5620-4491-3578-4823-3406/quan.html", tag: "Security" },
+            { name: "Hyper-AI", icon: "🤖", desc: "AI-powered chatbot to help you.", url: "https://ship-it-afk.github.io/8403-9172-5620-4491-3578-4823-3406/ai.html", tag: "Utility" },
+            { name: "AI Dictionary", icon: "📚", desc: "AI-powered dictionary to help you study.", url: "https://ship-it-afk.github.io/8403-9172-5620-4491-3578-4823-3406/dic.html", tag: "Education" },
+            { name: "ASAS Search", icon: "🌐", desc: "AI-powered web searching engine.", url: "https://ship-it-afk.github.io/8403-9172-5620-4491-3578-4823-3406/search.html", tag: "Utility" },
+            { name: "URL Shortener", icon: "🔗", desc: "Shorten a long url within a second.", url: "https://ship-it-afk.github.io/8403-9172-5620-4491-3578-4823-3406/url.html", tag: "Utility" },
+            { name: "Temp Email", icon: "📧", desc: "Temp and disposable email generator.", url: "https://ship-it-afk.github.io/8403-9172-5620-4491-3578-4823-3406/temp.html", tag: "Utility" },
+            { name: "ASAS Notes", icon: "📝", desc: "Easy and useful cloud notes.", url: "https://ship-it-afk.github.io/8403-9172-5620-4491-3578-4823-3406/notes.html", tag: "Utility" },
+            { name: "ScreenSaver", icon: "🖥️", desc: "Turn your screen into useful information.", url: "https://ship-it-afk.github.io/8403-9172-5620-4491-3578-4823-3406/office/ASAS%20ScreenSaver.html", tag: "ScreenSaver" },
+            { name: "ASAS Draw", icon: "🖌️", desc: "A paint app official by ASAS.", url: "https://ship-it-afk.github.io/8403-9172-5620-4491-3578-4823-3406/office/draw.html", tag: "Drawing" },
+            { name: "ASAS Writer", icon: "📜", desc: "A document app official by ASAS.", url: "https://ship-it-afk.github.io/8403-9172-5620-4491-3578-4823-3406/office/ASAS%20Writer.html", tag: "Documents" },
+            { name: "ASAS Spreadsheet", icon: "𝄜", desc: "A workbook app official by ASAS.", url: "https://ship-it-afk.github.io/8403-9172-5620-4491-3578-4823-3406/office/ASAS%20Spreadsheet.html", tag: "SPREADSHEET" },
+            { name: "ASAS Presenter", icon: "🎞️", desc: "A slide app official by ASAS.", url: "https://ship-it-afk.github.io/8403-9172-5620-4491-3578-4823-3406/office/ASAS%20Presenter.html", tag: "Presenter" },
+            { name: "PDF Forensic Info", icon: "🕵️", desc: "Next-gen forensic detailed pdf info.", url: "https://ship-it-afk.github.io/8403-9172-5620-4491-3578-4823-3406/Expert%20PDF%20Info.html", tag: "PDF Intelligence" },
+            { name: "Audio Forensic Info", icon: "🎧", desc: "Next-gen forensic detailed pdf info.", url: "https://ship-it-afk.github.io/8403-9172-5620-4491-3578-4823-3406/Expert%20Audio%20Info.html", tag: "Audio Intelligence" },
+            { name: "Video Forensic Info", icon: "📹", desc: "Next-gen forensic detailed video.", url: "https://ship-it-afk.github.io/8403-9172-5620-4491-3578-4823-3406/Expert%20Video%20Info.html", tag: "Video Intelligence" },
+            { name: "CloudOS", icon: "🐧", desc: "Based on open-source codes.", url: "https://cloud-peach-delta.vercel.app/", tag: "CloudOS (Beta)" }
+        ];
+
+        const container = document.getElementById('container');
+
+        appList.forEach(app => {
+            const card = document.createElement('div');
+            card.className = 'app-card';
+            card.innerHTML = `
+                <span class="tag">${app.tag}</span>
+                <div class="app-icon">${app.icon}</div>
+                <div class="app-name">${app.name}</div>
+                <div class="app-desc">${app.desc}</div>
+                <a href="${app.url}" target="_blank" class="btn">Launch App</a>
+            `;
+            container.appendChild(card);
+        });
+    </script>
+</body>
+</html>
