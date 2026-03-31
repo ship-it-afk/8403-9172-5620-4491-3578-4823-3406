@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickTemp Mail - Fix Edition</title>
+    <style>
+        :root { --primary: #2563eb; --bg: #f8fafc; --card: #ffffff; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #334155; }
+        .container { max-width: 800px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 30px; }
+        .email-box { background: var(--card); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+        #email-address { flex-grow: 1; font-size: 1.1rem; font-weight: 600; color: var(--primary); background: #eff6ff; padding: 10px; border-radius: 8px; border: 1px dashed var(--primary); word-break: break-all; }
+        button { cursor: pointer; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; transition: 0.2s; }
+        .btn-copy { background: var(--primary); color: white; }
+        .btn-refresh { background: #10b981; color: white; }
+        .btn-new { background: #64748b; color: white; }
+        button:hover { opacity: 0.9; transform: translateY(-1px); }
+        .inbox-card { background: var(--card); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .inbox-header { padding: 15px 20px; background: #f1f5f9; border-bottom: 1px solid #e2e8f0; font-weight: bold; display: flex; justify-content: space-between; }
+        #mail-list { min-height: 200px; }
+        .mail-item { padding: 15px 20px; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
+        .mail-item:hover { background: #f8fafc; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); padding: 20px; box-sizing: border-box; z-index: 1000; }
+        .modal-content { background: white; max-width: 700px; margin: 40px auto; border-radius: 12px; padding: 30px; position: relative; max-height: 80vh; overflow-y: auto; }
+        .close-btn { position: absolute; right: 20px; top: 20px; font-size: 1.5rem; cursor: pointer; }
+        .mail-body { margin-top: 20px; line-height: 1.6; border-top: 1px solid #eee; padding-top: 20px; }
+        #pass-display { font-size: 0.8rem; text-align: center; color: #94a3b8; margin-top: -15px; margin-bottom: 15px; font-family: monospace; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>QuickTemp Mail</h1>
+        <p>Real temporary email. Works from local file.</p>
+    </header>
+
+    <div class="email-box">
+        <div id="email-address">Loading...</div>
+        <button class="btn-copy" onclick="copyEmail()">Copy</button>
+        <button class="btn-new" onclick="regenerate()">New</button>
+        <button class="btn-refresh" onclick="fetchMessages()">Refresh</button>
+    </div>
+    <div id="pass-display">Password: --</div>
+
+    <div class="inbox-card">
+        <div class="inbox-header">
+            <span>Inbox</span>
+            <span id="status" style="font-weight: normal; font-size: 0.8rem; color: #10b981;">Checking...</span>
+        </div>
+        <div id="mail-list">
+            <div style="padding: 40px; text-align: center; color: #94a3b8;">Waiting for emails...</div>
+        </div>
+    </div>
+</div>
+
+<div id="mailModal" class="modal" onclick="closeMail()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="close-btn" onclick="closeMail()">&times;</span>
+        <h2 id="view-subject"></h2>
+        <div id="view-meta"></div>
+        <div id="view-body" class="mail-body"></div>
+    </div>
+</div>
+
+<script>
+    const API = "https://api.mail.tm";
+    
+    // Load existing data or set defaults
+    let state = {
+        token: localStorage.getItem('tm_token') || "",
+        email: localStorage.getItem('tm_email') || "",
+        password: localStorage.getItem('tm_pass') || "pass_" + Math.random().toString(36).substring(7)
+    };
+
+    async function init() {
+        if (state.token && state.email) {
+            document.getElementById('email-address').innerText = state.email;
+            document.getElementById('pass-display').innerText = `Password: ${state.password}`;
+            fetchMessages();
+            setInterval(fetchMessages, 7000);
+        } else {
+            await createAccount();
+        }
+    }
+
+    async function createAccount() {
+        try {
+            document.getElementById('email-address').innerText = "Creating...";
+            
+            // 1. Get Domain
+            const dRes = await fetch(`${API}/domains`);
+            const dData = await dRes.json();
+            const domain = dData['hydra:member'][0].domain;
+
+            // 2. Setup Credentials
+            const user = Math.random().toString(36).substring(7);
+            state.email = `${user}@${domain}`;
+            // state.password is already generated in the 'state' variable above
+
+            // 3. Register
+            const regRes = await fetch(`${API}/accounts`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ address: state.email, password: state.password })
+            });
+
+            if (!regRes.ok) throw new Error("Reg Failed");
+
+            // 4. Login
+            const logRes = await fetch(`${API}/token`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ address: state.email, password: state.password })
+            });
+            const logData = await logRes.json();
+            
+            state.token = logData.token;
+
+            // 5. Save everything
+            localStorage.setItem('tm_token', state.token);
+            localStorage.setItem('tm_email', state.email);
+            localStorage.setItem('tm_pass', state.password);
+
+            document.getElementById('email-address').innerText = state.email;
+            document.getElementById('pass-display').innerText = `Password: ${state.password}`;
+            
+            fetchMessages();
+            setInterval(fetchMessages, 7000);
+        } catch (err) {
+            document.getElementById('email-address').innerText = "Account Error. Refreshing...";
+            setTimeout(() => { localStorage.clear(); location.reload(); }, 2000);
+        }
+    }
+
+    async function fetchMessages() {
+        if (!state.token) return;
+        try {
+            const res = await fetch(`${API}/messages`, {
+                headers: { 'Authorization': `Bearer ${state.token}` }
+            });
+            const data = await res.json();
+            renderMailList(data['hydra:member']);
+            document.getElementById('status').innerText = "Online";
+        } catch (err) { 
+            document.getElementById('status').innerText = "Error - Reconnecting";
+        }
+    }
+
+    function renderMailList(mails) {
+        const list = document.getElementById('mail-list');
+        if (!mails || mails.length === 0) {
+            list.innerHTML = `<div style="padding: 40px; text-align: center; color: #94a3b8;">No messages yet...</div>`;
+            return;
+        }
+        list.innerHTML = mails.map(m => `
+            <div class="mail-item" onclick="readMail('${m.id}')">
+                <span class="sender">From: ${m.from.address}</span>
+                <span class="subject">${m.subject || '(No Subject)'}</span>
+            </div>
+        `).join('');
+    }
+
+    async function readMail(id) {
+        const res = await fetch(`${API}/messages/${id}`, {
+            headers: { 'Authorization': `Bearer ${state.token}` }
+        });
+        const mail = await res.json();
+        document.getElementById('view-subject').innerText = mail.subject || 'No Subject';
+        document.getElementById('view-meta').innerText = `From: ${mail.from.address}`;
+        document.getElementById('view-body').innerHTML = mail.html || `<pre>${mail.intro}</pre>`;
+        document.getElementById('mailModal').style.display = 'block';
+    }
+
+    function regenerate() {
+        if(confirm("New identity? This will delete current emails.")) {
+            localStorage.clear();
+            location.reload();
+        }
+    }
+
+    function closeMail() { document.getElementById('mailModal').style.display = 'none'; }
+    function copyEmail() { navigator.clipboard.writeText(state.email); alert("Copied!"); }
+
+    window.onload = init;
+</script>
+</body>
+</html>
