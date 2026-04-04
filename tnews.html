@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Dead Of ASAS</title>
+    <style>
+        /* 2026 MODERN CSS SETUP */
+        :root {
+            /* Using the new light-dark() function for instant theme support */
+            color-scheme: light dark;
+            
+            --bg-body: light-dark(#f8f9fa, #0f1115);
+            --bg-card: light-dark(#ffffff, #1a1d23);
+            --text-main: light-dark(#1a1a1a, #e0e0e0);
+            --text-muted: light-dark(#666666, #999999);
+            --accent: #2563eb;
+            --ad-bg: light-dark(#f1f5f9, #242933);
+            --border: light-dark(#e2e8f0, #2d333f);
+            
+            --font-serif: "Georgia", serif;
+            --font-sans: system-ui, -apple-system, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            line-height: 1.6;
+            transition: background 0.3s ease;
+        }
+
+        /* HEADER SECTION */
+        header {
+            padding: 2rem 5%;
+            text-align: center;
+            border-bottom: 4px solid var(--text-main);
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            font-family: var(--font-serif);
+            font-size: 3.5rem;
+            font-weight: 900;
+            letter-spacing: -2px;
+            text-transform: uppercase;
+        }
+
+        .date-line {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        /* MAIN LAYOUT: Using Modern Grid */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 2rem;
+            padding: 0 5%;
+        }
+
+        @media (max-width: 900px) {
+            .container { grid-template-columns: 1fr; }
+        }
+
+        /* ARTICLE STYLING */
+        .main-article {
+            container-type: inline-size; /* Enable Container Queries */
+        }
+
+        .article-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+        }
+
+        .hero-img {
+            width: 100%;
+            height: 400px;
+            background: #cbd5e1;
+            object-fit: cover;
+            /* Adaptive image for dark mode */
+            filter: light-dark(none, brightness(0.8) contrast(1.1));
+        }
+
+        .article-content {
+            padding: 2rem;
+        }
+
+        .category {
+            color: var(--accent);
+            text-transform: uppercase;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+
+        .headline {
+            font-family: var(--font-serif);
+            font-size: clamp(2rem, 5cqw, 3.5rem); /* Fluid typography */
+            line-height: 1.1;
+            margin: 1rem 0;
+        }
+
+        .lead {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        /* SIDEBAR & ADS */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .ad-box {
+            background: var(--ad-bg);
+            padding: 1.5rem;
+            border: 1px dashed var(--text-muted);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .ad-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .ad-content {
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .trending-item {
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .trending-item:last-child { border: none; }
+
+        footer {
+            text-align: center;
+            padding: 4rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* BUTTONS */
+        .btn {
+            background: var(--text-main);
+            color: var(--bg-body);
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover { transform: scale(1.05); }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">The Breaking News</div>
+    <div class="date-line">Tuesday, April 4, 2026</div>
+</header>
+
+<main class="container">
+    <section class="main-article">
+        <article class="article-card">
+            <img src="https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=1200" alt="Future Tech" class="hero-img">
+            
+            <div class="article-content">
+                <span class="category">ASAS Technology</span>
+                <h1 class="headline">ASAS is now AFOTech!</h1>
+                <p class="lead">To celebrate the 100th anniversary of ASAS Technologies, we are proud to announce our rebranding to AFOTech. Standing for 'A Future Of Technologies,' AFOTech represents our commitment to developing the next generation of futuristic hardware and software.</p>
+            </div>
+        </article>
+    </section>
+
+    <aside class="sidebar">
+        <div class="ad-box">
+            <span class="ad-label">SPONSORED CONTENT</span>
+            <div class="ad-content">Upgrade to Fiber-Air™ 10G</div>
+            <p style="font-size: 0.8rem; margin-top: 5px;">Latency is so 2024. Feel the air.</p>
+        </div>
+
+        <div class="trending">
+            <h3 style="margin-bottom: 1rem; border-bottom: 2px solid var(--accent); display: inline-block;">Trending Now</h3>
+            
+            <div class="trending-item">
+                <small class="category">Hyper-AI</small>
+                <h4>Hyper-AI v3 is released!</h4>
+            </div>
+            
+            <div class="trending-item">
+                <small class="category">Rebranding</small>
+                <h4>ASAS is now AFOTech!</h4>
+            </div>
+            
+            <div class="trending-item">
+                <small class="category">FastBrowser</small>
+                <h4>FastBrowser v6 Developer Build (Nightly) is now alive!!</h4>
+            </div>
+        </div>
+
+        <div class="ad-box" style="background-color: var(--accent); color: white;">
+            <span class="ad-label" style="color: rgba(255,255,255,0.7)">ADVERTISEMENT</span>
+            <div class="ad-content">Join the Neural-Link Beta</div>
+            <p style="font-size: 0.8rem; margin-top: 5px;">Type with your thoughts. Fast.</p>
+        </div>
+    </aside>
+</main>
+
+<footer>
+    &copy; 2026 AFOTech (formerly ASAS). Built for modern technologies.
+</footer>
+
+</body>
+</html>
