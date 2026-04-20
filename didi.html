@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Battery Experience</title>
 
 <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
@@ -12,12 +13,24 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
 <style>
+
+/* 🌌 BASE */
 body {
   margin:0;
-  font-family: Arial, sans-serif;
-  background:#0b0f2a;
+  font-family: 'Segoe UI', sans-serif;
+  background: radial-gradient(circle at 20% 20%, #0f1a4a, #050814 70%);
   color:white;
   overflow-x:hidden;
+}
+
+/* ✨ GLASS STYLE */
+.glass {
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.15);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.3);
 }
 
 /* Sections */
@@ -31,7 +44,7 @@ body {
   display:flex;
   align-items:center;
   background:
-    linear-gradient(to right, #0b0f2a 30%, transparent 70%),
+    linear-gradient(to right, #050814 30%, transparent 70%),
     url("image2.png") right center/cover no-repeat;
 }
 
@@ -39,6 +52,9 @@ body {
   margin-left:8%;
   font-size:3rem;
   opacity:0;
+  background: linear-gradient(90deg,#fff,#9ecbff);
+  -webkit-background-clip: text;
+  color: transparent;
 }
 
 /* 3D */
@@ -48,21 +64,17 @@ model-viewer {
   opacity:0;
 }
 
-/* 🚗 CAR GROUP (important) */
+/* 🚗 CAR GROUP */
 .car-group {
   position:fixed;
   bottom:10%;
   right:-350px;
   width:280px;
+  filter: drop-shadow(0 20px 30px rgba(0,0,0,0.6));
 }
 
-/* Car image */
-.car {
-  width:100%;
-  display:block;
-}
+.car { width:100%; }
 
-/* Attached image */
 .fly {
   position:absolute;
   top:50%;
@@ -70,6 +82,7 @@ model-viewer {
   transform:translate(-50%, -50%) scale(0.2);
   width:160px;
   opacity:0;
+  filter: drop-shadow(0 0 20px rgba(0,150,255,0.7));
 }
 
 /* TEXT */
@@ -81,8 +94,51 @@ model-viewer {
   opacity:0;
   transform:translateX(120px);
 }
+
 .text h1 {
   font-size:3rem;
+  background: linear-gradient(90deg,#fff,#00d4ff);
+  -webkit-background-clip:text;
+  color:transparent;
+}
+
+/* 🧱 CONTENT SECTION (reusable) */
+.info-section {
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:60px 10%;
+}
+
+.info-container {
+  display:flex;
+  gap:50px;
+  align-items:center;
+  max-width:1200px;
+}
+
+/* Image */
+.info-img {
+  width:400px;
+  border-radius:20px;
+  overflow:hidden;
+}
+
+/* Text */
+.info-text {
+  flex:1;
+  padding:30px;
+}
+
+.info-text h2 {
+  font-size:2.5rem;
+  margin-bottom:10px;
+}
+
+.info-text p {
+  opacity:0.8;
+  line-height:1.6;
 }
 
 /* FINAL */
@@ -95,18 +151,29 @@ model-viewer {
 
 button {
   margin-top:20px;
-  padding:12px 30px;
+  padding:14px 40px;
   border:none;
   border-radius:30px;
-  background:#ffcc00;
+  background: linear-gradient(90deg,#00d4ff,#6a5cff);
+  color:white;
+  font-weight:bold;
   cursor:pointer;
+  transition:0.3s;
+}
+
+button:hover {
+  transform:scale(1.1);
+  box-shadow:0 0 20px rgba(0,200,255,0.6);
 }
 
 /* MOBILE */
-@media(max-width:768px){
-  .hero-text {font-size:2rem;}
-  .car-group {width:200px;}
+@media(max-width:900px){
+  .info-container {
+    flex-direction:column;
+  }
+  .info-img {width:100%;}
 }
+
 </style>
 </head>
 
@@ -122,32 +189,64 @@ button {
   <model-viewer id="model"
     src="3d.glb"
     camera-controls
-    auto-rotate
-    interaction-prompt="auto">
+    auto-rotate>
   </model-viewer>
 </section>
 
-<!-- SCROLL SECTIONS -->
+<!-- SCROLL SCENES -->
 <section class="section"></section>
 <section class="section"></section>
 
-<!-- FINAL -->
-<section class="section final">
-  <h1>Thanks</h1>
-  <button onclick="window.location.href='https://google.com'">Rate</button>
-</section>
-
-<!-- 🚗 CAR + IMAGE GROUP -->
+<!-- 🚗 CAR -->
 <div class="car-group" id="carGroup">
   <img src="https://cdn-icons-png.flaticon.com/512/743/743922.png" class="car">
   <img src="image1.png" class="fly" id="fly">
 </div>
 
 <!-- TEXT -->
-<div class="text" id="text">
+<div class="text glass" id="text">
   <h1>Solar-powered</h1>
   <p>Clean renewable energy powering the future with efficiency and sustainability.</p>
 </div>
+
+<!-- 🧱 EASY ADD SECTION (duplicate this block) -->
+<section class="info-section">
+  <div class="info-container glass">
+
+    <img src="image1.png" class="info-img">
+
+    <div class="info-text">
+      <h2>Energy Storage</h2>
+      <p>
+        Advanced battery systems store energy efficiently and release it when needed,
+        ensuring maximum performance and sustainability.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<section class="info-section">
+  <div class="info-container glass">
+
+    <img src="image2.png" class="info-img">
+
+    <div class="info-text">
+      <h2>Smart Integration</h2>
+      <p>
+        Seamlessly integrates solar energy into modern transportation systems
+        with intelligent energy management.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- FINAL -->
+<section class="section final">
+  <h1>Thanks</h1>
+  <button onclick="window.location.href='https://google.com'">Rate</button>
+</section>
 
 <script>
 gsap.registerPlugin(ScrollTrigger);
@@ -169,7 +268,7 @@ gsap.to("#model", {
   }
 });
 
-/* MASTER TIMELINE */
+/* TIMELINE */
 let tl = gsap.timeline({
   scrollTrigger:{
     trigger:".section:nth-child(3)",
@@ -180,7 +279,7 @@ let tl = gsap.timeline({
   }
 });
 
-/* 🚗 ENTER */
+/* CAR ENTER */
 tl.to("#carGroup", {
   right:"50%",
   x:"50%",
@@ -188,7 +287,7 @@ tl.to("#carGroup", {
   ease:"power4.out"
 });
 
-/* ✨ IMAGE APPEARS (stays attached) */
+/* IMAGE */
 tl.to("#fly", {
   opacity:1,
   scale:0.5,
@@ -196,7 +295,7 @@ tl.to("#fly", {
   ease:"back.out(1.7)"
 }, "-=1");
 
-/* 🚗 MOVE LEFT */
+/* MOVE LEFT */
 tl.to("#carGroup", {
   left:"5%",
   right:"auto",
@@ -205,29 +304,18 @@ tl.to("#carGroup", {
   ease:"power3.inOut"
 });
 
-/* 📝 TEXT IN */
+/* TEXT */
 tl.to("#text", {
   opacity:1,
   x:0,
-  duration:1.5,
-  ease:"power2.out"
+  duration:1.5
 }, "-=1");
 
-/* 🚗 EXIT */
+/* EXIT */
 tl.to("#carGroup", {
   left:"-400px",
   duration:2,
   ease:"power4.in"
-});
-
-/* FINAL */
-gsap.from(".final h1", {
-  opacity:0,
-  y:50,
-  scrollTrigger:{
-    trigger:".final",
-    start:"top 80%"
-  }
 });
 </script>
 
