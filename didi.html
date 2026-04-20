@@ -3,10 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Battery Experience</title>
 
+<!-- Model Viewer -->
 <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
+<!-- GSAP -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 
 <style>
 body {
@@ -21,98 +25,67 @@ body {
 .section {
   height:100vh;
   position:relative;
-  display:flex;
-  align-items:center;
-  justify-content:center;
 }
 
 /* HERO */
 .hero {
+  display:flex;
+  align-items:center;
   background:
     linear-gradient(to right, #0b0f2a 30%, transparent 70%),
     url("image2.png") right center/cover no-repeat;
 }
 
 .hero-text {
-  position:absolute;
-  left:8%;
+  margin-left:8%;
   font-size:3rem;
   opacity:0;
-  transform:translateY(50px);
-  transition:1.5s ease;
-}
-.hero-text.show {
-  opacity:1;
-  transform:translateY(0);
 }
 
 /* 3D */
 model-viewer {
-  width:80%;
-  height:80%;
+  width:100%;
+  height:100%;
   opacity:0;
-  transition:1s;
-}
-model-viewer.show {
-  opacity:1;
 }
 
 /* CAR */
 .car {
-  position:absolute;
-  width:300px;
-  right:-400px;
-  transition:2s ease;
-}
-.car.center {
-  right:50%;
-  transform:translateX(50%);
-}
-.car.left {
-  right:auto;
-  left:5%;
-}
-.car.exit {
-  left:-400px;
+  position:fixed;
+  bottom:10%;
+  width:280px;
+  right:-350px;
 }
 
 /* FLOAT IMAGE */
 .fly {
-  position:absolute;
-  width:200px;
+  position:fixed;
+  bottom:30%;
+  left:50%;
+  transform:translateX(-50%) scale(0.2);
+  width:180px;
   opacity:0;
-  transform:scale(0.2);
-  transition:1.5s ease;
-}
-.fly.show {
-  opacity:1;
-  transform:scale(0.5);
 }
 
-/* TEXT BLOCK */
+/* TEXT */
 .text {
-  position:absolute;
+  position:fixed;
   right:5%;
+  top:40%;
   max-width:400px;
   opacity:0;
   transform:translateX(120px);
-  transition:1.5s;
 }
-.text.show {
-  opacity:1;
-  transform:translateX(0);
-}
-
 .text h1 {
   font-size:3rem;
 }
 
 /* FINAL */
 .final {
+  display:flex;
   flex-direction:column;
-}
-.final h1 {
-  font-size:3rem;
+  justify-content:center;
+  align-items:center;
 }
 
 button {
@@ -136,7 +109,7 @@ button {
 
 <!-- HERO -->
 <section class="section hero">
-  <div class="hero-text" id="heroText">Battery is energy</div>
+  <div class="hero-text">Battery is energy</div>
 </section>
 
 <!-- 3D -->
@@ -145,28 +118,15 @@ button {
     src="3d.glb"
     camera-controls
     auto-rotate
-    interaction-prompt="auto"
-    touch-action="pan-y">
+    interaction-prompt="auto">
   </model-viewer>
 </section>
 
-<!-- CAR CENTER + IMAGE -->
-<section class="section">
-  <img src="https://cdn-icons-png.flaticon.com/512/743/743922.png" class="car" id="car1">
-  <img src="image1.png" class="fly" id="flyImg">
-</section>
+<!-- CAR SCENE -->
+<section class="section"></section>
 
-<!-- TEXT + CAR LEFT -->
-<section class="section">
-  <img src="https://cdn-icons-png.flaticon.com/512/743/743922.png" class="car" id="car2">
-  <div class="text" id="text">
-    <h1>Solar-powered</h1>
-    <p>
-      Clean renewable energy powering the next generation of mobility.
-      Efficient, sustainable and future-ready.
-    </p>
-  </div>
-</section>
+<!-- TEXT SCENE -->
+<section class="section"></section>
 
 <!-- FINAL -->
 <section class="section final">
@@ -174,45 +134,95 @@ button {
   <button onclick="window.location.href='https://google.com'">Rate</button>
 </section>
 
+<!-- FLOAT + CAR + TEXT -->
+<img src="https://cdn-icons-png.flaticon.com/512/743/743922.png" class="car" id="car">
+<img src="image1.png" class="fly" id="fly">
+<div class="text" id="text">
+  <h1>Solar-powered</h1>
+  <p>Clean renewable energy powering the future with efficiency and sustainability.</p>
+</div>
+
 <script>
+gsap.registerPlugin(ScrollTrigger);
 
-// HERO LOAD
-window.onload = () => {
-  heroText.classList.add("show");
-};
+/* HERO FADE */
+gsap.to(".hero-text", {
+  opacity:1,
+  y:-20,
+  duration:1.5,
+  ease:"power3.out"
+});
 
-// OBSERVER
-const observer = new IntersectionObserver((entries)=>{
-  entries.forEach(e=>{
-    if(e.isIntersecting){
+/* 3D FADE IN */
+gsap.to("#model", {
+  opacity:1,
+  scrollTrigger:{
+    trigger:"#model",
+    start:"top 80%",
+    toggleActions:"play none none none"
+  }
+});
 
-      if(e.target.id === "model"){
-        model.classList.add("show");
-      }
+/* MASTER TIMELINE */
+let tl = gsap.timeline({
+  scrollTrigger:{
+    trigger:".section:nth-child(3)",
+    start:"top top",
+    end:"+=3000",
+    scrub:1.5,   // 👈 scroll easing (inertia feel)
+    pin:true
+  }
+});
 
-      if(e.target.id === "car1"){
-        car1.classList.add("center");
-        flyImg.classList.add("show");
-      }
+/* 🚗 CAR ENTER (with acceleration curve) */
+tl.to("#car", {
+  right:"50%",
+  x:"50%",
+  duration:2,
+  ease:"power4.out"   // acceleration effect
+});
 
-      if(e.target.id === "text"){
-        car2.classList.add("left");
-        text.classList.add("show");
-      }
+/* ✨ IMAGE FLY IN */
+tl.to("#fly", {
+  opacity:1,
+  scale:0.5,
+  duration:1.5,
+  ease:"back.out(1.7)"
+}, "-=1");
 
-      if(e.target.id === "finalTrigger"){
-        car2.classList.add("exit");
-      }
+/* 🚗 MOVE LEFT */
+tl.to("#car", {
+  left:"5%",
+  right:"auto",
+  x:0,
+  duration:2,
+  ease:"power3.inOut"
+});
 
-    }
-  });
-},{threshold:0.5});
+/* 📝 TEXT IN */
+tl.to("#text", {
+  opacity:1,
+  x:0,
+  duration:1.5,
+  ease:"power2.out"
+}, "-=1");
 
-// Observe elements
-observer.observe(document.getElementById("model"));
-observer.observe(document.getElementById("car1"));
-observer.observe(document.getElementById("text"));
+/* 🚗 EXIT LEFT */
+tl.to("#car", {
+  left:"-400px",
+  duration:2,
+  ease:"power4.in"
+});
 
+/* FINAL FADE */
+gsap.from(".final h1", {
+  opacity:0,
+  y:50,
+  scrollTrigger:{
+    trigger:".final",
+    start:"top 80%"
+  }
+});
 </script>
 
 </body>
