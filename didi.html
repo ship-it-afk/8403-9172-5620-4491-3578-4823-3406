@@ -24,13 +24,13 @@
         /* 3D */
         model-viewer { width:100%; height:100%; opacity:0; }
         
-        /* 🚗 CAR GROUP (Container for animations) */
-        .car-group { position:fixed; bottom:10%; right:-350px; width:500px; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.6)); }
-        .fly { position:absolute; top:50%; left:50%; transform:translate(-50%, -50%) scale(0.2); width:160px; opacity:0; filter: drop-shadow(0 0 20px rgba(0,150,255,0.7)); }
+        /* 🚗 CAR GROUP (Updated for 'Normal' Image display) */
+        .car-group { position:fixed; bottom:15%; right:-500px; width:450px; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.6)); }
+        .fly { width:100%; height:auto; opacity:0; border-radius: 20px; }
         
         /* TEXT */
-        .text { position:fixed; right:5%; top:40%; max-width:400px; opacity:0; transform:translateX(120px); }
-        .text h1 { font-size:3rem; background: linear-gradient(90deg,#fff,#00d4ff); -webkit-background-clip:text; color:transparent; }
+        .text { position:fixed; right:5%; top:40%; max-width:400px; opacity:0; transform:translateX(120px); padding: 30px; }
+        .text h1 { font-size:3rem; margin-top:0; background: linear-gradient(90deg,#fff,#00d4ff); -webkit-background-clip:text; color:transparent; }
         
         /* 🧱 CONTENT SECTION */
         .info-section { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:60px 10%; }
@@ -45,7 +45,7 @@
         button { margin-top:20px; padding:14px 40px; border:none; border-radius:30px; background: linear-gradient(90deg,#00d4ff,#6a5cff); color:white; font-weight:bold; cursor:pointer; transition:0.3s; }
         button:hover { transform:scale(1.1); box-shadow:0 0 20px rgba(0,200,255,0.6); }
         
-        @media(max-width:900px){ .info-container { flex-direction:column; } .info-img {width:100%;} }
+        @media(max-width:900px){ .info-container { flex-direction:column; } .info-img {width:100%;} .car-group { width: 300px; } }
     </style>
 </head>
 <body>
@@ -101,10 +101,10 @@
     /* HERO */
     gsap.to(".hero-text", { opacity:1, y:-20, duration:1.5, ease:"power3.out" });
 
-    /* 3D */
+    /* 3D MODEL FADE IN */
     gsap.to("#model", { opacity:1, scrollTrigger:{ trigger:"#model", start:"top 80%" } });
 
-    /* TIMELINE */
+    /* SCROLL ANIMATION TIMELINE */
     let tl = gsap.timeline({
         scrollTrigger:{
             trigger:".section:nth-child(3)",
@@ -115,20 +115,20 @@
         }
     });
 
-    /* CAR GROUP ENTER */
-    tl.to("#carGroup", { right:"50%", x:"50%", duration:2, ease:"power4.out" });
+    /* CAR GROUP ENTERS FROM RIGHT */
+    tl.to("#carGroup", { right:"55%", x:"0%", duration:2, ease:"power4.out" });
 
-    /* IMAGE FADE IN */
-    tl.to("#fly", { opacity:1, scale:0.5, duration:1.5, ease:"back.out(1.7)" }, "-=1");
+    /* IMAGE FADES IN (Normal Scale) */
+    tl.to("#fly", { opacity:1, duration:1.5, ease:"power2.out" }, "-=1");
 
-    /* MOVE LEFT */
-    tl.to("#carGroup", { left:"5%", right:"auto", x:0, duration:2, ease:"power3.inOut" });
+    /* MOVE TO THE LEFT SIDE */
+    tl.to("#carGroup", { left:"8%", right:"auto", duration:2, ease:"power3.inOut" });
 
-    /* TEXT FADE IN */
-    tl.to("#text", { opacity:1, x:0, duration:1.5 }, "-=1");
+    /* TEXT FADES IN */
+    tl.to("#text", { opacity:1, x:0, duration:1.5 }, "-=1.5");
 
-    /* EXIT */
-    tl.to("#carGroup", { left:"-400px", duration:2, ease:"power4.in" });
+    /* EXIT ANIMATION */
+    tl.to("#carGroup", { left:"-600px", opacity: 0, duration:2, ease:"power4.in" });
 </script>
 
 </body>
