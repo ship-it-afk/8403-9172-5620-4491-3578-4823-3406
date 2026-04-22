@@ -18,7 +18,7 @@
         .section { height:100vh; position:relative; }
         
         /* HERO */
-        .hero { display:flex; align-items:center; background: linear-gradient(to right, #050814 90%, transparent 70%), url("image2.png") right center/cover no-repeat; }
+        .hero { display:flex; align-items:center; background: linear-gradient(to right, #050814 30%, transparent 70%), url("image2.png") right center/cover no-repeat; }
         .hero-text { margin-left:8%; font-size:3rem; opacity:0; background: linear-gradient(90deg,#fff,#9ecbff); -webkit-background-clip: text; color: transparent; }
         
         /* 3D */
@@ -116,7 +116,7 @@
     });
 
     /* CAR GROUP ENTER */
-    tl.to("#carGroup", { right:"50%", x:"50%", duration:2, ease:"power4.out" });
+    tl.to("#carGroup", { right:"90%", x:"50%", duration:2, ease:"power4.out" });
 
     /* IMAGE FADE IN */
     tl.to("#fly", { opacity:1, scale:0.5, duration:1.5, ease:"back.out(1.7)" }, "-=1");
