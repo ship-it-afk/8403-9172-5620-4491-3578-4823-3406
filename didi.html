@@ -25,7 +25,7 @@
         model-viewer { width:100%; height:100%; opacity:0; }
         
         /* 🚗 CAR GROUP (Container for animations) */
-        .car-group { position:fixed; bottom:10%; right:-350px; width:280px; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.6)); }
+        .car-group { position:fixed; bottom:10%; right:-350px; width:500px; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.6)); }
         .fly { position:absolute; top:50%; left:50%; transform:translate(-50%, -50%) scale(0.2); width:160px; opacity:0; filter: drop-shadow(0 0 20px rgba(0,150,255,0.7)); }
         
         /* TEXT */
@@ -116,7 +116,7 @@
     });
 
     /* CAR GROUP ENTER */
-    tl.to("#carGroup", { right:"90%", x:"50%", duration:2, ease:"power4.out" });
+    tl.to("#carGroup", { right:"50%", x:"50%", duration:2, ease:"power4.out" });
 
     /* IMAGE FADE IN */
     tl.to("#fly", { opacity:1, scale:0.5, duration:1.5, ease:"back.out(1.7)" }, "-=1");
