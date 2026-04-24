@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASAS Hyper-AI 3.0</title>
+    <title>Ambient Hybrid-AI 3.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -194,7 +194,7 @@
         <nav class="top-nav">
             <div style="font-size: 16px; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
                 <span class="material-symbols-rounded ai-icon" style="font-size: 28px;">auto_awesome</span>
-                ASAS Hyper-AI
+                Ambient Hybrid-AI
             </div>
             <div class="icon-btn" onclick="toggleSettings()"><span class="material-symbols-rounded">settings</span></div>
         </nav>
@@ -215,7 +215,7 @@
                     <input type="file" id="file-input" hidden accept=".pdf,.docx">
                     <span class="material-symbols-rounded">attachment</span>
                 </label>
-                <textarea id="user-input" placeholder="Message Hyper-AI..." rows="1" autocomplete="off"></textarea>
+                <textarea id="user-input" placeholder="Message Hybrid-AI..." rows="1" autocomplete="off"></textarea>
                 <div class="action-btns">
                     <div id="send-btn" class="icon-btn send-btn"><span class="material-symbols-rounded">arrow_upward</span></div>
                     <div id="stop-btn" class="icon-btn" style="display:none; color: #ef4444;"><span class="material-symbols-rounded">stop_circle</span></div>
@@ -340,7 +340,7 @@
         entry.innerHTML = `
             <div class="role-header">
                 ${!isUser ? '<span class="material-symbols-rounded ai-icon">auto_awesome</span>' : ''}
-                ${isUser ? 'Request' : 'Hyper-AI'}
+                ${isUser ? 'Request' : 'Hybrid-AI'}
             </div>
             <div class="content-body ${isStreaming ? 'streaming' : ''}"></div>
         `;
@@ -397,7 +397,7 @@
         addMessage("You", val);
         elements.input.value = "";
         elements.input.style.height = 'auto';
-        elements.input.placeholder = "Message Hyper-AI...";
+        elements.input.placeholder = "Message Hybrid-AI...";
         runQuery(val);
     };
 
