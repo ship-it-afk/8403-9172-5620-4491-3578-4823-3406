@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Private Session | FastBrowser</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        /* Color Palette & Mode Logic */
+        :root {
+            /* Light Mode Defaults */
+            --bg-color: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --accent-color: #2563eb;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --glow-opacity: 0.08;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #05070a;
+                --card-bg: rgba(255, 255, 255, 0.03);
+                --accent-color: #3b82f6;
+                --text-primary: #f8fafc;
+                --text-secondary: #94a3b8;
+                --border-color: rgba(255, 255, 255, 0.1);
+                --glow-opacity: 0.15;
+                --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Better for mobile scrolling */
+            min-height: 100vh;
+            padding: 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Responsive Background Glow */
+        body::before {
+            content: '';
+            position: fixed;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(59, 130, 246, var(--glow-opacity)) 0%, transparent 70%);
+            top: -50px;
+            left: -50px;
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            padding: 2.5rem 1.5rem;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 32px;
+            box-shadow: var(--shadow);
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            margin: auto 0;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .icon-wrapper {
+            width: 56px;
+            height: 56px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.25rem;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.75rem;
+            /* Adaptive Gradient */
+            background: linear-gradient(to bottom right, var(--text-primary), var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .lead {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            padding: 0 10px;
+        }
+
+        .info-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .info-section h2 {
+            font-size: 1.1rem;
+            color: var(--accent-color);
+            margin-bottom: 1.25rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-align: center;
+        }
+
+        .card-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .card-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            padding: 1.25rem;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        /* Touch interaction for phone */
+        .card-item:active {
+            transform: scale(0.98);
+            background: rgba(59, 130, 246, 0.05);
+        }
+
+        .card-item b {
+            display: block;
+            color: var(--text-primary);
+            margin-bottom: 0.4rem;
+            font-size: 1rem;
+        }
+
+        .card-item p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .footer-note {
+            margin-top: 2rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-align: center;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+            line-height: 1.7;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Mobile Optimization */
+        @media (max-width: 480px) {
+            .container {
+                padding: 2rem 1.25rem;
+                border-radius: 24px;
+            }
+            h1 { font-size: 1.75rem; }
+            .lead { font-size: 0.95rem; }
+            .card-item { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header class="header">
+            <div class="icon-wrapper">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent-color)">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    <path d="M12 8v4"></path>
+                    <path d="M12 16h.01"></path>
+                </svg>
+            </div>
+            <h1>Browse in Private</h1>
+            <p class="lead">Your activity remains local. FastBrowser limits the data saved to this device during this session.</p>
+        </header>
+
+        <main class="info-grid">
+            <section class="info-section">
+                <h2>Local Protection</h2>
+                <ul class="card-list">
+                    <li class="card-item">
+                        <b>Authentication Shield</b>
+                        <p>FastBrowser doesn’t automatically sign you into Google, Ambient, or other site accounts. This prevents immediate session linking across the web.</p>
+                    </li>
+                    <li class="card-item">
+                        <b>Ephemeral Site Data</b>
+                        <p>Cookies and site data are kept temporarily to ensure sites function, but are wiped the moment your Private Window closes.</p>
+                    </li>
+                    <li class="card-item">
+                        <b>Persistent Downloads</b>
+                        <p>Any files you explicitly choose to download will remain on your device after the session ends for your convenience.</p>
+                    </li>
+                </ul>
+            </section>
+
+            <footer class="footer-note">
+                <p>Note: While Private Window keeps your history off this device, you aren't invisible. Your ISP, employer, and the websites you visit (including Ambient services) can still see your network activity as outlined in our <b>Privacy Policy</b>.</p>
+            </footer>
+        </main>
+    </div>
+
+</body>
+</html>
