@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>FastBrowser Privacy Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Adaptive Design Tokens */
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.3);
+            --text-main: #1d1d1f;
+            --text-muted: #6e6e73;
+            --accent: #0071e3;
+            --card-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-gradient: radial-gradient(circle at top right, #1a1a2e, #0f0f0f);
+                --glass-bg: rgba(28, 28, 30, 0.8);
+                --glass-border: rgba(255, 255, 255, 0.1);
+                --text-main: #f5f5f7;
+                --text-muted: #86868b;
+                --accent: #2997ff;
+                --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-gradient);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: env(safe-area-inset-top) 20px env(safe-area-inset-bottom);
+            display: flex;
+            justify-content: center;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px; /* Optimized for mobile width */
+            padding-top: 40px;
+            padding-bottom: 100px;
+        }
+
+        /* Floating Header (Dynamic Island Style) */
+        .header-pill {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            padding: 12px 24px;
+            margin-bottom: 40px;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            background: linear-gradient(to right, var(--text-main), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Section Layout */
+        .section-title {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            margin-left: 8px;
+            font-weight: 600;
+        }
+
+        .content-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--card-shadow);
+        }
+
+        p {
+            font-size: 1rem;
+            line-height: 1.5;
+            color: var(--text-muted);
+        }
+
+        /* Interactive List for Cookies */
+        .cookie-toggle-item {
+            display: flex;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .cookie-toggle-item:last-child {
+            border-bottom: none;
+        }
+
+        .icon-box {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            flex-shrink: 0;
+        }
+
+        .item-info h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .item-info p {
+            font-size: 0.85rem;
+        }
+
+        /* Modern Tip Interaction */
+        .smart-tip {
+            background: var(--accent);
+            color: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .smart-tip::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 150px;
+            height: 150px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+
+        .btn-action {
+            display: inline-block;
+            margin-top: 24px;
+            padding: 14px 28px;
+            background: var(--text-main);
+            color: var(--bg-color); /* Note: inverted for contrast */
+            border-radius: 16px;
+            font-weight: 700;
+            text-decoration: none;
+            width: 100%;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .btn-action:active {
+            transform: scale(0.97);
+        }
+
+        /* Dark mode text correction for button */
+        @media (prefers-color-scheme: dark) {
+            .btn-action { background: #fff; color: #000; }
+        }
+        @media (prefers-color-scheme: light) {
+            .btn-action { background: #000; color: #fff; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header-pill">
+        <h1>FastBrowser Private Browsing Privacy</h1>
+    </div>
+
+    <section>
+        <div class="section-title">Overview</div>
+        <div class="content-card">
+            <p>Managing cookies in 2026 is seamless. FastBrowser remembers your preferences and keeps you signed in while shielding your identity from trackers.</p>
+        </div>
+    </section>
+
+    <section>
+        <div class="section-title">Cookie Types</div>
+        <div class="content-card">
+            <div class="cookie-toggle-item">
+                <div class="icon-box">👤</div>
+                <div class="item-info">
+                    <h3>First-party</h3>
+                    <p>Essential site data & logins</p>
+                </div>
+            </div>
+            <div class="cookie-toggle-item">
+                <div class="icon-box" style="filter: hue-rotate(45deg);">🌐</div>
+                <div class="item-info">
+                    <h3>Third-party</h3>
+                    <p>Cross-site personalization</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="section-title">Ad Privacy</div>
+        <div class="content-card">
+            <p>Our <strong>Privacy Sandbox</strong> tech limits what sites learn about you. Features like ad topics allow relevant ads without sharing your history.</p>
+        </div>
+    </section>
+
+    <div class="smart-tip">
+        <strong>Privacy Tip:</strong> "Ephemeral Mode" is an auto-delete cookies the moment you close a tab enabled by default when your use Private Browsing.
+    </div>
+</div>
+
+</body>
+</html>
