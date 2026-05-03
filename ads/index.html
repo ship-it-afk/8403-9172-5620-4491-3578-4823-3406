@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background-color: #000;
+      }
+      
+      #container {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #000;
+      }
+      
+      #image-container {
+        width: 100%;
+        height: 100%;
+      }
+      
+      #image-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: fill;
+        display: block;
+      }
+      
+      #status {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        color: white;
+        font-family: Arial, sans-serif;
+        font-size: 18px;
+        background: rgba(0,0,0,0.7);
+        padding: 10px 20px;
+        border-radius: 4px;
+        z-index: 10;
+        pointer-events: none;
+      }
+      
+      #timer {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        color: white;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        background: rgba(0,0,0,0.5);
+        padding: 5px 10px;
+        border-radius: 4px;
+        z-index: 10;
+        pointer-events: none;
+      }
+      
+      #pause-indicator {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        color: #ffcc00;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        background: rgba(0,0,0,0.5);
+        padding: 5px 10px;
+        border-radius: 4px;
+        z-index: 10;
+        pointer-events: none;
+        display: none;
+      }
+      
+      .error { color: #ff6b6b; font-size: 24px; text-align: center; }
+      .loading { color: #aaa; font-size: 20px; text-align: center; }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div id="status" class="loading">Loading...</div>
+      <div id="image-container"></div>
+      <div id="timer">Next reload in: 10s</div>
+      <div id="pause-indicator">⏸ PAUSED - Page covered</div>
+    </div>
+
+    <script>
+      // Your Google Apps Script Web App URL
+      const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzH2wEdwbZM4vFISKdHtl3r44cJkzQpIH_Y5KxEkCLdgi-Mc1Cd3WYsvZQZ2ox3V_I/exec";
+      
+      let countdown = 10;
+      let reloadTimer = null;
+      let isPaused = false;
+      
+      window.onload = function() {
+        loadNewImage();
+        startReloadTimer();
+        setupVisibilityListener();
+      };
+
+      function loadNewImage() {
+        document.getElementById('status').innerText = "Loading...";
+        document.getElementById('image-container').innerHTML = "";
+
+        fetch(SCRIPT_URL)
+          .then(response => response.json())
+          .then(data => {
+            displayImage(data);
+          })
+          .catch(error => {
+            document.getElementById('status').innerHTML = `<span class="error">Error: ${error.message}</span>`;
+          });
+      }
+
+      function displayImage(data) {
+        if (data.error) {
+          document.getElementById('status').innerHTML = `<span class="error">${data.error}</span>`;
+          return;
+        }
+
+        document.getElementById('status').innerText = `Provider: ${data.provider} | Remaining: ${data.remaining_new}`;
+        
+        var img = document.createElement('img');
+        img.src = data.filename;
+        img.alt = data.filename;
+        img.onerror = function() {
+          this.style.display = 'none';
+          document.getElementById('image-container').innerHTML = `<span class="error">⚠️ Image not found: ${data.filename}</span>`;
+        };
+        
+        document.getElementById('image-container').appendChild(img);
+      }
+
+      function startReloadTimer() {
+        if (reloadTimer) clearInterval(reloadTimer);
+        countdown = 10;
+        document.getElementById('timer').innerText = `Next reload in: ${countdown}s`;
+        
+        reloadTimer = setInterval(function() {
+          // Only count down if the page is visible
+          if (!isPaused && !document.hidden) {
+            countdown--;
+            document.getElementById('timer').innerText = `Next reload in: ${countdown}s`;
+            
+            if (countdown <= 0) {
+              clearInterval(reloadTimer);
+              window.location.reload();
+            }
+          }
+        }, 1000);
+      }
+
+      function setupVisibilityListener() {
+        document.addEventListener('visibilitychange', function() {
+          if (document.hidden) {
+            // Page is hidden/covered by other apps
+            pauseReload();
+          } else {
+            // Page is visible again
+            resumeReload();
+          }
+        });
+      }
+
+      function pauseReload() {
+        isPaused = true;
+        document.getElementById('pause-indicator').style.display = 'block';
+        document.getElementById('timer').innerText = `⏸ PAUSED`;
+      }
+
+      function resumeReload() {
+        isPaused = false;
+        document.getElementById('pause-indicator').style.display = 'none';
+        // Reset countdown to 10 when resuming
+        countdown = 10;
+        document.getElementById('timer').innerText = `Next reload in: ${countdown}s`;
+      }
+    </script>
+  </body>
+</html>
