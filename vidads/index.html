@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background-color: #000;
+      }
+      
+      #container {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #000;
+      }
+      
+      #video-container {
+        width: 100%;
+        height: 100%;
+      }
+      
+      #video-container video {
+        width: 100%;
+        height: 100%;
+        object-fit: fill;
+        display: block;
+      }
+      
+      #status {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        color: white;
+        font-family: Arial, sans-serif;
+        font-size: 18px;
+        background: rgba(0,0,0,0.7);
+        padding: 10px 20px;
+        border-radius: 4px;
+        z-index: 10;
+        pointer-events: none;
+      }
+      
+      #timer {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        color: white;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        background: rgba(0,0,0,0.5);
+        padding: 5px 10px;
+        border-radius: 4px;
+        z-index: 10;
+        pointer-events: none;
+      }
+      
+      .error { color: #ff6b6b; font-size: 24px; text-align: center; }
+      .loading { color: #aaa; font-size: 20px; text-align: center; }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div id="status" class="loading">Loading...</div>
+      <div id="video-container"></div>
+      <div id="timer">Next reload in: 10s</div>
+    </div>
+
+    <script>
+      // Your Google Apps Script Web App URL
+      const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxtcvQT_kllrrFiMpSuxP28QYm1litD97lyne61pFnw1SklOP3JifPWRS7GPf8dTMXf/exec";
+      
+      let countdown = 10;
+      let reloadTimer = null;
+      
+      window.onload = function() {
+        loadNewVideo();
+        startReloadTimer();
+      };
+
+      function loadNewVideo() {
+        document.getElementById('status').innerText = "Loading...";
+        document.getElementById('video-container').innerHTML = "";
+
+        fetch(SCRIPT_URL)
+          .then(response => response.json())
+          .then(data => {
+            displayVideo(data);
+          })
+          .catch(error => {
+            document.getElementById('status').innerHTML = `<span class="error">Error: ${error.message}</span>`;
+          });
+      }
+
+      function displayVideo(data) {
+        if (data.error) {
+          document.getElementById('status').innerHTML = `<span class="error">${data.error}</span>`;
+          return;
+        }
+
+        document.getElementById('status').innerText = `Provider: ${data.provider} | Remaining: ${data.remaining_new}`;
+        
+        var video = document.createElement('video');
+        video.src = data.filename;
+        video.autoplay = true;
+        video.loop = true;
+        video.muted = true; // Required for autoplay in most browsers
+        video.playsInline = true;
+        video.controls = false;
+        
+        video.onerror = function() {
+          this.style.display = 'none';
+          document.getElementById('video-container').innerHTML = `<span class="error">⚠️ Video not found: ${data.filename}</span>`;
+        };
+        
+        document.getElementById('video-container').appendChild(video);
+      }
+
+      function startReloadTimer() {
+        if (reloadTimer) clearInterval(reloadTimer);
+        countdown = 10;
+        document.getElementById('timer').innerText = `Next reload in: ${countdown}s`;
+        
+        reloadTimer = setInterval(function() {
+          countdown--;
+          document.getElementById('timer').innerText = `Next reload in: ${countdown}s`;
+          
+          if (countdown <= 0) {
+            clearInterval(reloadTimer);
+            window.location.reload();
+          }
+        }, 1000);
+      }
+    </script>
+  </body>
+</html>
