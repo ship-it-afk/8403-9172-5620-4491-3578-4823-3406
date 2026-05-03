@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ambient Hybrid-AI 3.0</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --glass-bg: rgba(255, 255, 255, 0.9);
+            --sidebar-color: #ffffff;
+            --text-main: #0f172a;
+            --text-sub: #64748b;
+            --accent-primary: #6366f1;
+            --gemini-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
+            --border-subtle: rgba(0, 0, 0, 0.05);
+            --shadow-soft: 0 4px 20px -5px rgba(0,0,0,0.05);
+            --chat-font-size: 16px;
+            --bubble-ai: #ffffff;
+            --bubble-user: #f1f5f9;
+            --input-bg: rgba(255, 255, 255, 0.95);
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #020617;
+            --glass-bg: rgba(15, 23, 42, 0.95);
+            --sidebar-color: #0f172a;
+            --text-main: #f1f5f9;
+            --text-sub: #94a3b8;
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --shadow-soft: 0 10px 30px -10px rgba(0,0,0,0.5);
+            --bubble-ai: #1e293b;
+            --bubble-user: #334155;
+            --input-bg: rgba(30, 41, 59, 0.9);
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0; display: flex; height: 100dvh; overflow: hidden;
+            transition: background-color 0.3s ease;
+        }
+
+        /* MOBILE SIDEBAR LOGIC */
+        .sidebar {
+            position: fixed; left: -280px; top: 0; bottom: 0; width: 280px; 
+            background: var(--sidebar-color); border-right: 1px solid var(--border-subtle);
+            display: flex; flex-direction: column; padding: 20px 16px; z-index: 1000;
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .sidebar.active { left: 0; }
+        .sidebar-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.4); 
+            display: none; z-index: 999; backdrop-filter: blur(4px);
+        }
+        .sidebar-overlay.active { display: block; }
+
+        .new-chat {
+            display: flex; align-items: center; gap: 12px; padding: 14px 20px;
+            background: var(--text-main); color: var(--bg-color); border-radius: 16px;
+            font-weight: 500; cursor: pointer; margin-bottom: 20px;
+        }
+
+        .settings-panel {
+            position: fixed; right: -100%; top: 0; bottom: 0; width: 100%; max-width: 350px;
+            background: var(--glass-bg); backdrop-filter: blur(25px);
+            border-left: 1px solid var(--border-subtle); z-index: 1100; padding: 30px;
+            transition: right 0.3s ease;
+        }
+        .settings-panel.open { right: 0; }
+
+        .main-container { flex: 1; display: flex; flex-direction: column; position: relative; width: 100%; }
+        
+        .top-nav {
+            padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;
+            background: var(--glass-bg); border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .chat-viewport { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .chat-container { max-width: 850px; margin: 0 auto; padding: 20px 16px 180px 16px; }
+
+        .greeting, .sub-greeting { font-size: 38px; font-weight: 600; letter-spacing: -1px; margin: 0; }
+        .greeting { background: var(--gemini-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .sub-greeting { color: var(--text-sub); opacity: 0.4; }
+
+        .entry { margin-bottom: 24px; animation: slideIn 0.3s ease; }
+        .role-header { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 11px; text-transform: uppercase; color: var(--text-sub); margin-bottom: 8px; }
+        
+        .content-body { 
+            font-size: var(--chat-font-size); line-height: 1.6; color: var(--text-main); 
+            background: var(--bubble-ai); padding: 16px; border-radius: 18px;
+            box-shadow: var(--shadow-soft); border: 1px solid var(--border-subtle);
+            word-wrap: break-word;
+        }
+        .user-entry .content-body { background: var(--bubble-user); border: none; max-width: 90%; margin-left: auto; }
+
+        .input-area { 
+            position: absolute; bottom: 0; left: 0; right: 0; 
+            padding: 10px 12px 24px 12px; background: linear-gradient(transparent, var(--bg-color) 40%);
+        }
+        .input-wrapper { 
+            width: 100%; background: var(--input-bg);
+            border: 1px solid var(--border-subtle); border-radius: 24px; 
+            padding: 8px 12px; display: flex; align-items: flex-end; gap: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        }
+        textarea { flex: 1; background: transparent; border: none; outline: none; padding: 8px 0; font-size: 16px; resize: none; max-height: 150px; color: var(--text-main); }
+        
+        .icon-btn { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-sub); }
+        .send-btn { background: var(--text-main); color: var(--bg-color) !important; opacity: 0.2; pointer-events: none; }
+        .send-btn.active { opacity: 1; pointer-events: all; }
+
+        .quick-actions { display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; width: 100%; padding-bottom: 5px; }
+        .action-chip { 
+            flex-shrink: 0; padding: 6px 14px; border-radius: 15px; border: 1px solid var(--border-subtle);
+            background: var(--sidebar-color); font-size: 12px; white-space: nowrap;
+        }
+
+        .streaming::after { content: ""; display: inline-block; width: 6px; height: 15px; background: var(--accent-primary); margin-left: 5px; animation: pulse 1s infinite; }
+        @keyframes pulse { 50% { opacity: 0; } }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } }
+    </style>
+</head>
+<body data-theme="light">
+    <div class="sidebar-overlay" id="overlay" onclick="toggleMenu()"></div>
+    
+    <aside class="sidebar" id="sidebar">
+        <div class="new-chat" onclick="location.reload()">
+            <span class="material-symbols-rounded">add</span>
+            <span>New Chat</span>
+        </div>
+        <div id="history-list" style="flex: 1; overflow-y: auto;">
+            <p style="font-size: 10px; color: var(--text-sub); padding-left: 10px; letter-spacing: 1px;">HISTORY</p>
+        </div>
+    </aside>
+
+    <div class="settings-panel" id="settings-panel">
+        <div class="settings-header" style="display:flex; justify-content:space-between; margin-bottom:20px;">
+            <h3 style="margin:0">Settings</h3>
+            <div class="icon-btn" onclick="toggleSettings()"><span class="material-symbols-rounded">close</span></div>
+        </div>
+        <div class="setting-item" style="margin-bottom:20px;">
+            <label style="font-size:11px; font-weight:700; color:var(--text-sub); text-transform:uppercase;">Appearance</label>
+            <div onclick="toggleTheme()" style="display:flex; justify-content:space-between; align-items:center; padding:12px; background:var(--bubble-user); border-radius:12px; margin-top:8px;">
+                <span id="theme-text">Dark Mode</span>
+                <span class="material-symbols-rounded" id="theme-icon">dark_mode</span>
+            </div>
+        </div>
+        <button onclick="saveSettings()" style="width:100%; padding:14px; border:none; border-radius:12px; background:var(--accent-primary); color:white; font-weight:600;">Save & Close</button>
+    </div>
+
+    <main class="main-container">
+        <nav class="top-nav">
+            <div class="icon-btn" onclick="toggleMenu()"><span class="material-symbols-rounded">menu</span></div>
+            <div style="font-size: 15px; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 6px;">
+                <span class="material-symbols-rounded ai-icon" style="font-variation-settings: 'FILL' 1; color: #6366f1;">auto_awesome</span>
+                Hybrid-AI
+            </div>
+            <div class="icon-btn" onclick="toggleSettings()"><span class="material-symbols-rounded">settings</span></div>
+        </nav>
+
+        <div class="chat-viewport" id="viewport">
+            <div class="chat-container">
+                <div id="welcome-view" style="margin-top: 10vh;">
+                    <h1 class="greeting">Hello, User!</h1>
+                    <h1 class="sub-greeting">How can I help?</h1>
+                </div>
+                <div id="chat-history"></div>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <div class="input-wrapper">
+                <label class="icon-btn">
+                    <input type="file" id="file-input" hidden accept=".pdf,.docx">
+                    <span class="material-symbols-rounded">attachment</span>
+                </label>
+                <textarea id="user-input" placeholder="Ask anything..." rows="1"></textarea>
+                <div id="send-btn" class="icon-btn send-btn"><span class="material-symbols-rounded">arrow_upward</span></div>
+                <div id="stop-btn" class="icon-btn" style="display:none; color: #ef4444;"><span class="material-symbols-rounded">stop_circle</span></div>
+            </div>
+            <div class="quick-actions">
+                <div class="action-chip" onclick="handleLearnClick()">📚 Learn</div>
+                <div class="action-chip" onclick="handleBoostClick()">⚡ Boost</div>
+            </div>
+        </div>
+    </main>
+
+<script>
+    // --- MOBILE UI HELPERS ---
+    function toggleMenu() {
+        document.getElementById('sidebar').classList.toggle('active');
+        document.getElementById('overlay').classList.toggle('active');
+    }
+
+    function toggleSettings() {
+        document.getElementById('settings-panel').classList.toggle('open');
+    }
+
+    // --- CORE LOGIC ---
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    
+    const elements = {
+        history: document.getElementById('chat-history'),
+        welcome: document.getElementById('welcome-view'),
+        input: document.getElementById('user-input'),
+        send: document.getElementById('send-btn'),
+        stop: document.getElementById('stop-btn'),
+        viewport: document.getElementById('viewport'),
+        file: document.getElementById('file-input'),
+        settings: document.getElementById('settings-panel')
+    };
+
+    let docContext = "";
+    let currentAbortController = null;
+
+    function toggleTheme() {
+        const body = document.body;
+        const isDark = body.getAttribute('data-theme') === 'dark';
+        const newTheme = isDark ? 'light' : 'dark';
+        body.setAttribute('data-theme', newTheme);
+        document.getElementById('theme-text').innerText = isDark ? 'Dark Mode' : 'Light Mode';
+        document.getElementById('theme-icon').innerText = isDark ? 'dark_mode' : 'light_mode';
+        localStorage.setItem('hyper_ai_theme', newTheme);
+    }
+
+    function saveSettings() {
+        toggleSettings();
+    }
+
+    elements.input.addEventListener('input', () => {
+        elements.input.style.height = 'auto';
+        elements.input.style.height = Math.min(elements.input.scrollHeight, 150) + 'px';
+        elements.send.classList.toggle('active', elements.input.value.trim().length > 0);
+    });
+
+    function addMessage(role, text = "", isStreaming = false) {
+        elements.welcome.style.display = 'none';
+        const entry = document.createElement('div');
+        const isUser = role === 'You';
+        entry.className = `entry ${isUser ? 'user-entry' : 'ai-entry'}`;
+        entry.innerHTML = `
+            <div class="role-header">${isUser ? 'You' : 'Hybrid-AI'}</div>
+            <div class="content-body ${isStreaming ? 'streaming' : ''}"></div>
+        `;
+        elements.history.appendChild(entry);
+        const body = entry.querySelector('.content-body');
+        if (isUser) body.innerText = text;
+        else if (text) body.innerHTML = marked.parse(text);
+        elements.viewport.scrollTo({ top: elements.viewport.scrollHeight, behavior: 'smooth' });
+        return body;
+    }
+
+    async function runQuery(text) {
+        elements.send.style.display = 'none';
+        elements.stop.style.display = 'flex';
+        const botDiv = addMessage("AI", "", true);
+        currentAbortController = new AbortController();
+        
+        try {
+            const finalPrompt = docContext + text;
+            const url = `https://text.pollinations.ai/openai/${encodeURIComponent(finalPrompt)}?stream=true`;
+            const response = await fetch(url, { signal: currentAbortController.signal });
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let fullText = "";
+
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                const chunk = decoder.decode(value);
+                // Simple stream parser
+                const lines = chunk.split('\n');
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        try {
+                            const data = JSON.parse(line.slice(6));
+                            fullText += data.choices[0].delta.content || "";
+                            botDiv.innerHTML = marked.parse(fullText);
+                            elements.viewport.scrollTop = elements.viewport.scrollHeight;
+                        } catch (e) {}
+                    }
+                }
+            }
+        } catch (err) {
+            if (err.name !== 'AbortError') botDiv.innerText = "Error connecting to AI.";
+        } finally {
+            botDiv.classList.remove('streaming');
+            elements.send.style.display = 'flex';
+            elements.stop.style.display = 'none';
+        }
+    }
+
+    elements.send.onclick = () => {
+        const val = elements.input.value.trim();
+        if (!val) return;
+        addMessage("You", val);
+        elements.input.value = "";
+        elements.input.style.height = 'auto';
+        runQuery(val);
+    };
+
+    elements.file.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const status = addMessage("AI", `Reading ${file.name}...`, true);
+        try {
+            const buf = await file.arrayBuffer();
+            let text = "";
+            if (file.name.endsWith('.pdf')) {
+                const pdf = await pdfjsLib.getDocument({data: buf}).promise;
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const content = await page.getTextContent();
+                    text += content.items.map(s => s.str).join(" ");
+                }
+            } else {
+                const res = await mammoth.extractRawText({arrayBuffer: buf});
+                text = res.value;
+            }
+            docContext = `[CONTEXT: ${text.substring(0, 5000)}] `;
+            status.innerHTML = "✅ Document processed. I am ready to answer questions about it.";
+        } catch (err) { status.innerText = "Failed to read file."; }
+        status.classList.remove('streaming');
+    };
+
+    function handleLearnClick() { elements.input.value = "Explain this to me like I'm 5: "; elements.input.focus(); }
+    function handleBoostClick() { elements.input.value = "Give me 3 high-impact productivity tips for today."; elements.send.click(); }
+
+    // Init theme
+    if (localStorage.getItem('hyper_ai_theme') === 'dark') toggleTheme();
+</script>
+</body>
+</html>
