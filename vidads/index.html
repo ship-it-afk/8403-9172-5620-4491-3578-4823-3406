@@ -59,6 +59,21 @@
         pointer-events: none;
       }
       
+      #pause-indicator {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        color: #ffcc00;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        background: rgba(0,0,0,0.5);
+        padding: 5px 10px;
+        border-radius: 4px;
+        z-index: 10;
+        pointer-events: none;
+        display: none;
+      }
+      
       .error { color: #ff6b6b; font-size: 24px; text-align: center; }
       .loading { color: #aaa; font-size: 20px; text-align: center; }
     </style>
@@ -68,6 +83,7 @@
       <div id="status" class="loading">Loading...</div>
       <div id="video-container"></div>
       <div id="timer">Next reload in: 10s</div>
+      <div id="pause-indicator">⏸ PAUSED - Page covered</div>
     </div>
 
     <script>
@@ -76,10 +92,12 @@
       
       let countdown = 10;
       let reloadTimer = null;
+      let isPaused = false;
       
       window.onload = function() {
         loadNewVideo();
         startReloadTimer();
+        setupVisibilityListener();
       };
 
       function loadNewVideo() {
@@ -126,14 +144,47 @@
         document.getElementById('timer').innerText = `Next reload in: ${countdown}s`;
         
         reloadTimer = setInterval(function() {
-          countdown--;
-          document.getElementById('timer').innerText = `Next reload in: ${countdown}s`;
-          
-          if (countdown <= 0) {
-            clearInterval(reloadTimer);
-            window.location.reload();
+          // Only count down if the page is visible
+          if (!isPaused && !document.hidden) {
+            countdown--;
+            document.getElementById('timer').innerText = `Next reload in: ${countdown}s`;
+            
+            if (countdown <= 0) {
+              clearInterval(reloadTimer);
+              window.location.reload();
+            }
           }
         }, 1000);
+      }
+
+      function setupVisibilityListener() {
+        document.addEventListener('visibilitychange', function() {
+          if (document.hidden) {
+            // Page is hidden/covered by other apps
+            pauseReload();
+          } else {
+            // Page is visible again
+            resumeReload();
+          }
+        });
+      }
+
+      function pauseReload() {
+        isPaused = true;
+        document.getElementById('pause-indicator').style.display = 'block';
+        document.getElementById('timer').innerText = `⏸ PAUSED`;
+        // Pause all videos
+        document.querySelectorAll('video').forEach(v => v.pause());
+      }
+
+      function resumeReload() {
+        isPaused = false;
+        document.getElementById('pause-indicator').style.display = 'none';
+        // Reset countdown to 10 when resuming
+        countdown = 10;
+        document.getElementById('timer').innerText = `Next reload in: ${countdown}s`;
+        // Resume all videos
+        document.querySelectorAll('video').forEach(v => v.play());
       }
     </script>
   </body>
