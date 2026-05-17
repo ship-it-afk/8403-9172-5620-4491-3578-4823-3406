@@ -1,2 +1,2 @@
-Version: 5
-Changelog: Improved performance stability. 
+Version: 5.5
+Changelog: Improved automatic update reliability. 
