@@ -1,2 +1,2 @@
-Version: 5.5
-Changelog: Improved automatic update reliability. 
+Version: 6.0
+Changelog: Major change for UI and UX to liquid glass.  
